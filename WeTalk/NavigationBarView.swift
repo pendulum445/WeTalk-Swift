@@ -108,13 +108,13 @@ class BaseNavigationBarView: UIView {
     }()
 }
 
-class ChatsNavigationBarView: BaseNavigationBarView {
+class HomeNavigationBarView: BaseNavigationBarView {
     
-    override init() {
+    init(title: String) {
         super.init()
         self.setFirstRightButtonImage(imageName: "more")
         self.setSecondRightButtonImage(imageName: "search")
-        self.setLabelTitle(title: "微信")
+        self.setLabelTitle(title: title)
     }
     
     required init?(coder: NSCoder) {

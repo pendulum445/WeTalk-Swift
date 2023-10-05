@@ -23,8 +23,8 @@ class ChatsViewController : UIViewController, NavigationBarViewDelegate {
         // TODO
     }
     
-    private lazy var navigationBarView: ChatsNavigationBarView = {
-        let view = ChatsNavigationBarView()
+    private lazy var navigationBarView: HomeNavigationBarView = {
+        let view = HomeNavigationBarView(title: "微信")
         view.delegate = self
         return view
     }()
