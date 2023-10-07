@@ -17,27 +17,28 @@ class BaseNavigationBarView: UIView {
     
     weak var delegate: NavigationBarViewDelegate?
     
-    public var statusBarHeight: CGFloat = 0
-    
     init() {
-        if let statusBarManager = UIApplication.shared.windows.first?.windowScene?.statusBarManager {
-            statusBarHeight = statusBarManager.statusBarFrame.height
-        }
-        super.init(frame: CGRect(x: 0, y: statusBarHeight, width: UIScreen.main.bounds.width, height:44))
+        super.init(frame: CGRectZero)
         self.backgroundColor = UIColor(red: 233.0/255.0, green: 233.0/255.0, blue: 233.0/255.0, alpha: 1.0)
         self.addSubview(self.leftButton)
         self.addSubview(self.firstRightButton)
         self.addSubview(self.secondRightButton)
         self.addSubview(self.titleLabel)
         NSLayoutConstraint.activate([
-            self.leftButton.centerYAnchor.constraint(equalTo: self.centerYAnchor),
             self.leftButton.leftAnchor.constraint(equalTo: self.leftAnchor, constant: 16),
-            self.firstRightButton.centerYAnchor.constraint(equalTo: self.centerYAnchor),
+            self.leftButton.centerYAnchor.constraint(equalTo: self.centerYAnchor),
+            self.leftButton.widthAnchor.constraint(equalToConstant: 12),
+            self.leftButton.heightAnchor.constraint(equalToConstant: 24),
             self.firstRightButton.rightAnchor.constraint(equalTo: self.rightAnchor, constant: -16),
-            self.secondRightButton.centerYAnchor.constraint(equalTo: self.centerYAnchor),
+            self.firstRightButton.centerYAnchor.constraint(equalTo: self.centerYAnchor),
+            self.firstRightButton.widthAnchor.constraint(equalToConstant: 24),
+            self.firstRightButton.heightAnchor.constraint(equalToConstant: 24),
             self.secondRightButton.rightAnchor.constraint(equalTo: self.firstRightButton.leftAnchor, constant: -16),
+            self.secondRightButton.centerYAnchor.constraint(equalTo: self.centerYAnchor),
+            self.secondRightButton.widthAnchor.constraint(equalToConstant: 24),
+            self.secondRightButton.heightAnchor.constraint(equalToConstant: 24),
             self.titleLabel.centerXAnchor.constraint(equalTo: self.centerXAnchor),
-            self.titleLabel.centerYAnchor.constraint(equalTo: self.centerYAnchor),
+            self.titleLabel.centerYAnchor.constraint(equalTo: self.centerYAnchor)
         ])
     }
     
@@ -76,7 +77,6 @@ class BaseNavigationBarView: UIView {
     
     private lazy var leftButton: UIButton = {
         let button = UIButton()
-        button.frame.size = CGSize(width: 12, height: 24)
         button.addTarget(self, action: #selector(didClickLeftButton), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
@@ -84,7 +84,6 @@ class BaseNavigationBarView: UIView {
     
     private lazy var firstRightButton: UIButton = {
         let button = UIButton()
-        button.frame.size = CGSize(width: 12, height: 24)
         button.addTarget(self, action: #selector(didClickFirstRightButton), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
@@ -92,7 +91,6 @@ class BaseNavigationBarView: UIView {
     
     private lazy var secondRightButton: UIButton = {
         let button = UIButton()
-        button.frame.size = CGSize(width: 12, height: 24)
         button.addTarget(self, action: #selector(didClickSecondRightButton), for: .touchUpInside)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
@@ -102,7 +100,6 @@ class BaseNavigationBarView: UIView {
         let label = UILabel()
         label.textColor = .black
         label.font = UIFont(name: "PingFangSC-Medium", size: 17)
-        label.center = self.center
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()

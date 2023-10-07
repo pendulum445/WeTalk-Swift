@@ -11,7 +11,7 @@ class MainTabBarController: UITabBarController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.viewControllers = [self.messageListViewController, self.contactsViewController, self.discoverViewController]
+        self.viewControllers = [self.messageListViewController, self.contactsViewController, self.discoverViewController, self.profileViewController]
     }
     
     private lazy var messageListViewController: ChatsViewController = {
@@ -23,7 +23,7 @@ class MainTabBarController: UITabBarController {
     private lazy var contactsViewController: UIViewController = {
         let vc = UIViewController()
         vc.view.backgroundColor = .white
-        vc.tabBarItem = UITabBarItem(title: "通讯录", image: UIImage(systemName: "person"), selectedImage: UIImage(systemName: "person.fill"))
+        vc.tabBarItem = UITabBarItem(title: "通讯录", image: UIImage(systemName: "person.2"), selectedImage: UIImage(systemName: "person.2.fill"))
         return vc
     }()
     
@@ -31,6 +31,13 @@ class MainTabBarController: UITabBarController {
         let vc = UIViewController()
         vc.view.backgroundColor = .white
         vc.tabBarItem = UITabBarItem(title: "发现", image: UIImage(systemName: "safari"), selectedImage: UIImage(systemName: "safari.fill"))
+        return vc
+    }()
+    
+    private lazy var profileViewController: UIViewController = {
+        let vc = UIViewController()
+        vc.view.backgroundColor = .white
+        vc.tabBarItem = UITabBarItem(title: "我", image: UIImage(systemName: "person"), selectedImage: UIImage(systemName: "person.fill"))
         return vc
     }()
 }
