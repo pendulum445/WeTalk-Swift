@@ -10,6 +10,8 @@
 		A2259F9F2AC689BC0047E6E3 /* ChatsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2259F9E2AC689BC0047E6E3 /* ChatsViewController.swift */; };
 		A2259FA12AC68C350047E6E3 /* MainTabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2259FA02AC68C350047E6E3 /* MainTabBarController.swift */; };
 		A28213B82ACE9DC300D1246C /* NavigationBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A28213B72ACE9DC300D1246C /* NavigationBarView.swift */; };
+		A2B0F1F62AD174290051A41E /* LookinServer in Frameworks */ = {isa = PBXBuildFile; productRef = A2B0F1F52AD174290051A41E /* LookinServer */; };
+		A2B0F1F92AD1754B0051A41E /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = A2B0F1F82AD1754B0051A41E /* Alamofire */; };
 		A2DA528F2AC56F76000276EF /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2DA528E2AC56F76000276EF /* AppDelegate.swift */; };
 		A2DA52982AC56F79000276EF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A2DA52972AC56F79000276EF /* Assets.xcassets */; };
 /* End PBXBuildFile section */
@@ -29,6 +31,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A2B0F1F62AD174290051A41E /* LookinServer in Frameworks */,
+				A2B0F1F92AD1754B0051A41E /* Alamofire in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -80,6 +84,10 @@
 			dependencies = (
 			);
 			name = WeTalk;
+			packageProductDependencies = (
+				A2B0F1F52AD174290051A41E /* LookinServer */,
+				A2B0F1F82AD1754B0051A41E /* Alamofire */,
+			);
 			productName = WeTalk;
 			productReference = A2DA528B2AC56F76000276EF /* WeTalk.app */;
 			productType = "com.apple.product-type.application";
@@ -108,6 +116,10 @@
 				Base,
 			);
 			mainGroup = A2DA52822AC56F76000276EF;
+			packageReferences = (
+				A2B0F1F42AD174290051A41E /* XCRemoteSwiftPackageReference "LookinServer" */,
+				A2B0F1F72AD1754B0051A41E /* XCRemoteSwiftPackageReference "Alamofire" */,
+			);
 			productRefGroup = A2DA528C2AC56F76000276EF /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -338,6 +350,38 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		A2B0F1F42AD174290051A41E /* XCRemoteSwiftPackageReference "LookinServer" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/QMUI/LookinServer";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
+		A2B0F1F72AD1754B0051A41E /* XCRemoteSwiftPackageReference "Alamofire" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Alamofire/Alamofire";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.8.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		A2B0F1F52AD174290051A41E /* LookinServer */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A2B0F1F42AD174290051A41E /* XCRemoteSwiftPackageReference "LookinServer" */;
+			productName = LookinServer;
+		};
+		A2B0F1F82AD1754B0051A41E /* Alamofire */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A2B0F1F72AD1754B0051A41E /* XCRemoteSwiftPackageReference "Alamofire" */;
+			productName = Alamofire;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = A2DA52832AC56F76000276EF /* Project object */;
 }
