@@ -7,13 +7,13 @@
 
 import UIKit
 
-@objc protocol NavigationBarViewDelegate: AnyObject {
+@objc protocol NavigationBarViewDelegate : AnyObject {
     @objc optional func didClickNavigationBarLeftButton()
     @objc optional func didClickNavigationBarFirstRightButton()
     @objc optional func didClickNavigationBarSecondRightButton()
 }
 
-class BaseNavigationBarView: UIView {
+class BaseNavigationBarView : UIView {
     
     weak var delegate: NavigationBarViewDelegate?
     
@@ -105,12 +105,26 @@ class BaseNavigationBarView: UIView {
     }()
 }
 
-class HomeNavigationBarView: BaseNavigationBarView {
+class HomeNavigationBarView : BaseNavigationBarView {
     
     init(title: String) {
         super.init()
         self.setFirstRightButtonImage(imageName: "more")
         self.setSecondRightButtonImage(imageName: "search")
+        self.setLabelTitle(title: title)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
+
+class FriendNavigationBar : BaseNavigationBarView {
+    
+    init(title: String) {
+        super.init()
+        self.setLeftButtonImage(imageName: "left_arrow")
+        self.setFirstRightButtonImage(imageName: "dots")
         self.setLabelTitle(title: title)
     }
     

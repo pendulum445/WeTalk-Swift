@@ -1,5 +1,5 @@
 //
-//  ChatsViewController.swift
+//  ChatListViewController.swift
 //  WeTalk
 //
 //  Created by liaoyunjie on 2023/9/29.
@@ -8,7 +8,7 @@
 import Alamofire
 import UIKit
 
-class ChatsViewController : UIViewController, UITableViewDataSource, UITableViewDelegate, NavigationBarViewDelegate {
+class ChatListViewController : UIViewController, UITableViewDataSource, UITableViewDelegate, NavigationBarViewDelegate {
     
     var chatCellModels: [ChatCellModel] = []
     
@@ -18,6 +18,11 @@ class ChatsViewController : UIViewController, UITableViewDataSource, UITableView
         self.view.backgroundColor = UIColor(red: 233.0/255.0, green: 233.0/255.0, blue: 233.0/255.0, alpha: 1.0)
         self.view.addSubview(self.navigationBarView)
         self.view.addSubview(self.tableView)
+        self.requestData()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         var statusBarHeight: CGFloat = 0
         if let statusBarManager = UIApplication.shared.windows.first?.windowScene?.statusBarManager {
             statusBarHeight = statusBarManager.statusBarFrame.height
@@ -32,7 +37,6 @@ class ChatsViewController : UIViewController, UITableViewDataSource, UITableView
             self.tableView.topAnchor.constraint(equalTo: self.navigationBarView.bottomAnchor),
             self.tableView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor)
         ])
-        self.requestData()
     }
     
     // MARK: Custom
@@ -47,7 +51,7 @@ class ChatsViewController : UIViewController, UITableViewDataSource, UITableView
     
     // MARK: UITableViewDataSource
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return chatCellModels.count
+        return self.chatCellModels.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -59,6 +63,12 @@ class ChatsViewController : UIViewController, UITableViewDataSource, UITableView
     // MARK: UITableViewDelegate
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 72
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        // TODO: 跳转到指定聊天
+        let vc = ChatViewController(friendInfo: self.chatCellModels[indexPath.row].friendInfo)
+        self.navigationController?.pushViewController(vc, animated: true)
     }
     
     // MARK: NavigationBarViewDelegate

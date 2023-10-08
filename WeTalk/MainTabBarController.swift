@@ -14,8 +14,8 @@ class MainTabBarController: UITabBarController {
         self.viewControllers = [self.messageListViewController, self.contactsViewController, self.discoverViewController, self.profileViewController]
     }
     
-    private lazy var messageListViewController: ChatsViewController = {
-        let vc = ChatsViewController()
+    private lazy var messageListViewController: ChatListViewController = {
+        let vc = ChatListViewController()
         vc.tabBarItem = UITabBarItem(title: "消息", image: UIImage(systemName: "message"), selectedImage: UIImage(systemName: "message.fill"))
         return vc
     }()
