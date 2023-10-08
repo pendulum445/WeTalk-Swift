@@ -104,7 +104,7 @@ class ChatCell: UITableViewCell {
             self.avatarImageView.heightAnchor.constraint(equalToConstant: 48),
             self.titleLabel.leftAnchor.constraint(equalTo: self.avatarImageView.rightAnchor, constant: 12),
             self.titleLabel.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 14),
-            self.titleLabel.widthAnchor.constraint(equalTo: self.contentView.widthAnchor, constant: -50),
+            self.titleLabel.widthAnchor.constraint(equalTo: self.contentView.widthAnchor, constant: -76-120),
             self.titleLabel.heightAnchor.constraint(equalToConstant: 24),
             self.redDotLabel.rightAnchor.constraint(equalTo: self.titleLabel.leftAnchor, constant: -7),
             self.redDotLabel.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 7),
@@ -141,7 +141,36 @@ class ChatCell: UITableViewCell {
         NSLayoutConstraint.activate([
             self.redDotLabel.widthAnchor.constraint(equalToConstant: textSize.width+5*2)
         ])
+        self.timeLabel.text = self.getLastChatTimeText(lastChatTime: model.lastChatTime)
+        self.timeLabel.sizeToFit()
         self.contentView.setNeedsLayout()
+    }
+    
+    func getLastChatTimeText(lastChatTime: String) -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yy-MM-dd HH:mm:ss"
+        if let date = dateFormatter.date(from: lastChatTime) {
+            let calendar = Calendar.current
+            let now = Date()
+            if calendar.isDateInToday(date) {
+                dateFormatter.dateFormat = "HH:mm"
+                return dateFormatter.string(from: date)
+            } else if calendar.isDateInYesterday(date) {
+                return "昨天"
+            } else if calendar.isDate(date, equalTo: now, toGranularity: .weekOfYear) {
+                dateFormatter.dateFormat = "E"
+                return dateFormatter.string(from: date)
+            } else {
+                if calendar.isDate(date, equalTo: now, toGranularity: .year) {
+                    dateFormatter.dateFormat = "MM月dd日"
+                } else {
+                    dateFormatter.dateFormat = "y年MM月dd日"
+                }
+                return dateFormatter.string(from: date)
+            }
+        } else {
+            return "Invalid Date"
+        }
     }
     
     // MARK: Getter
