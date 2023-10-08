@@ -82,6 +82,7 @@ class ChatsViewController : UIViewController, UITableViewDataSource, UITableView
         let tableView = UITableView(frame: CGRectZero)
         tableView.delegate = self
         tableView.dataSource = self
+        tableView.separatorStyle = .none
         tableView.register(ChatCell.self, forCellReuseIdentifier: String(describing: ChatCell.self))
         tableView.translatesAutoresizingMaskIntoConstraints = false
         return tableView
@@ -97,6 +98,7 @@ class ChatCell: UITableViewCell {
         self.contentView.addSubview(self.titleLabel)
         self.contentView.addSubview(self.summaryLabel)
         self.contentView.addSubview(self.timeLabel)
+        self.contentView.addSubview(self.bottomLineView)
         NSLayoutConstraint.activate([
             self.avatarImageView.leftAnchor.constraint(equalTo: self.contentView.leftAnchor, constant: 16),
             self.avatarImageView.centerYAnchor.constraint(equalTo: self.contentView.centerYAnchor),
@@ -114,7 +116,11 @@ class ChatCell: UITableViewCell {
             self.summaryLabel.widthAnchor.constraint(equalTo: self.titleLabel.widthAnchor),
             self.summaryLabel.heightAnchor.constraint(equalToConstant: 20),
             self.timeLabel.rightAnchor.constraint(equalTo: self.contentView.rightAnchor, constant: -16),
-            self.timeLabel.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 19)
+            self.timeLabel.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 19),
+            self.bottomLineView.leftAnchor.constraint(equalTo: self.contentView.leftAnchor, constant: 76),
+            self.bottomLineView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor),
+            self.bottomLineView.widthAnchor.constraint(equalTo: self.contentView.widthAnchor, constant: -76),
+            self.bottomLineView.heightAnchor.constraint(equalToConstant: 0.5)
         ])
     }
     
@@ -218,6 +224,13 @@ class ChatCell: UITableViewCell {
         label.translatesAutoresizingMaskIntoConstraints = false
         label.sizeToFit()
         return label
+    }()
+    
+    private lazy var bottomLineView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .black.withAlphaComponent(0.1)
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
     }()
 }
 
