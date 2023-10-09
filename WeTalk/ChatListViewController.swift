@@ -140,7 +140,6 @@ class ChatCell: UITableViewCell {
     
     // MARK: Custom
     func updateWithModel(model: ChatCellModel) {
-        // TODO: 更新Cell
         self.titleLabel.text = (model.friendInfo.noteName != nil) ? model.friendInfo.noteName : model.friendInfo.nickName
         self.summaryLabel.text = model.lastChat
         if model.unreadCount == 0 {
@@ -152,8 +151,8 @@ class ChatCell: UITableViewCell {
             self.redDotLabel.isHidden = false
             self.redDotLabel.text = "99+"
         }
-        let text = self.redDotLabel.text as! NSString
-        let textSize = text.size(withAttributes: [.font: self.redDotLabel.font])
+        let text = self.redDotLabel.text! as NSString
+        let textSize = text.size(withAttributes: [.font: self.redDotLabel.font!])
         NSLayoutConstraint.activate([
             self.redDotLabel.widthAnchor.constraint(equalToConstant: textSize.width+5*2)
         ])
