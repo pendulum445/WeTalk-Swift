@@ -30,7 +30,7 @@ class ChatListViewController : UIViewController, UITableViewDataSource, UITableV
         NSLayoutConstraint.activate([
             self.navigationBarView.centerXAnchor.constraint(equalTo: self.view.centerXAnchor),
             self.navigationBarView.topAnchor.constraint(equalTo: self.view.topAnchor, constant: statusBarHeight),
-            self.navigationBarView.widthAnchor.constraint(equalToConstant: UIScreen.main.bounds.width),
+            self.navigationBarView.widthAnchor.constraint(equalTo: self.view.widthAnchor),
             self.navigationBarView.heightAnchor.constraint(equalToConstant: 44),
             self.tableView.leftAnchor.constraint(equalTo: self.view.leftAnchor),
             self.tableView.rightAnchor.constraint(equalTo: self.view.rightAnchor),
@@ -66,7 +66,6 @@ class ChatListViewController : UIViewController, UITableViewDataSource, UITableV
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        // TODO: 跳转到指定聊天
         let vc = ChatViewController(friendInfo: self.chatCellModels[indexPath.row].friendInfo)
         self.navigationController?.pushViewController(vc, animated: true)
     }
@@ -100,6 +99,7 @@ class ChatListViewController : UIViewController, UITableViewDataSource, UITableV
 }
 
 class ChatCell: UITableViewCell {
+    
     // MARK: Life Cycle
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)

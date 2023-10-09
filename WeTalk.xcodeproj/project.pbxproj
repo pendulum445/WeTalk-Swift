@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		A2259F9F2AC689BC0047E6E3 /* ChatListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2259F9E2AC689BC0047E6E3 /* ChatListViewController.swift */; };
 		A2259FA12AC68C350047E6E3 /* MainTabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2259FA02AC68C350047E6E3 /* MainTabBarController.swift */; };
+		A253D8942AD3E0E0003C495D /* ContactsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A253D8932AD3E0E0003C495D /* ContactsViewController.swift */; };
 		A28213B82ACE9DC300D1246C /* NavigationBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A28213B72ACE9DC300D1246C /* NavigationBarView.swift */; };
 		A2B0F1F62AD174290051A41E /* LookinServer in Frameworks */ = {isa = PBXBuildFile; productRef = A2B0F1F52AD174290051A41E /* LookinServer */; };
 		A2B0F1F92AD1754B0051A41E /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = A2B0F1F82AD1754B0051A41E /* Alamofire */; };
@@ -20,6 +21,7 @@
 /* Begin PBXFileReference section */
 		A2259F9E2AC689BC0047E6E3 /* ChatListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatListViewController.swift; sourceTree = "<group>"; };
 		A2259FA02AC68C350047E6E3 /* MainTabBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabBarController.swift; sourceTree = "<group>"; };
+		A253D8932AD3E0E0003C495D /* ContactsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactsViewController.swift; sourceTree = "<group>"; };
 		A28213B72ACE9DC300D1246C /* NavigationBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationBarView.swift; sourceTree = "<group>"; };
 		A2B0F1FA2AD251A50051A41E /* ChatViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewController.swift; sourceTree = "<group>"; };
 		A2DA528B2AC56F76000276EF /* WeTalk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WeTalk.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -61,6 +63,7 @@
 			isa = PBXGroup;
 			children = (
 				A2DA529C2AC56F79000276EF /* Info.plist */,
+				A253D8932AD3E0E0003C495D /* ContactsViewController.swift */,
 				A2DA528E2AC56F76000276EF /* AppDelegate.swift */,
 				A2259F9E2AC689BC0047E6E3 /* ChatListViewController.swift */,
 				A2B0F1FA2AD251A50051A41E /* ChatViewController.swift */,
@@ -153,6 +156,7 @@
 				A28213B82ACE9DC300D1246C /* NavigationBarView.swift in Sources */,
 				A2B0F1FB2AD251A50051A41E /* ChatViewController.swift in Sources */,
 				A2259F9F2AC689BC0047E6E3 /* ChatListViewController.swift in Sources */,
+				A253D8942AD3E0E0003C495D /* ContactsViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
