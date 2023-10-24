@@ -19,6 +19,7 @@ class ContactsViewController : UIViewController, UITableViewDataSource, UITableV
         self.view.backgroundColor = UIColor(red: 233.0/255.0, green: 233.0/255.0, blue: 233.0/255.0, alpha: 1.0)
         self.view.addSubview(self.navigationBarView)
         self.view.addSubview(self.tableView)
+        self.requestData()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -42,9 +43,13 @@ class ContactsViewController : UIViewController, UITableViewDataSource, UITableV
     // MARK: Custom
     func requestData() {
         AF.request("https://mock.apifox.cn/m1/2415634-0-default/friendList?userId=<userId>").responseDecodable(of: FriendListResponse.self) { response in
-            if case .success(let friendListResponse) = response.result {
+            switch response.result {
+            case .success(let friendListResponse):
                 self.friendInfos = friendListResponse.data
                 self.tableView.reloadData()
+            case .failure(let error):
+                print(error)
+                // TODO: 显示加载失败页面
             }
         }
     }
@@ -53,8 +58,9 @@ class ContactsViewController : UIViewController, UITableViewDataSource, UITableV
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if section == 0 {
             return 2
+        } else {
+            return self.friendInfos?.count ?? 0
         }
-        return 0
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
