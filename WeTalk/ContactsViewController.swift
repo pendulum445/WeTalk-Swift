@@ -5,9 +5,13 @@
 //  Created by liaoyunjie on 2023/10/9.
 //
 
+import Alamofire
+import AlamofireImage
 import UIKit
 
 class ContactsViewController : UIViewController, UITableViewDataSource, UITableViewDelegate, NavigationBarViewDelegate {
+    
+    var friendInfos: [FriendInfo]?
     
     // MARK: Life Cycle
     override func viewDidLoad() {
@@ -35,6 +39,16 @@ class ContactsViewController : UIViewController, UITableViewDataSource, UITableV
         ])
     }
     
+    // MARK: Custom
+    func requestData() {
+        AF.request("https://mock.apifox.cn/m1/2415634-0-default/friendList?userId=<userId>").responseDecodable(of: FriendListResponse.self) { response in
+            if case .success(let friendListResponse) = response.result {
+                self.friendInfos = friendListResponse.data
+                self.tableView.reloadData()
+            }
+        }
+    }
+    
     // MARK: UITableViewDataSource
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if section == 0 {
@@ -47,10 +61,12 @@ class ContactsViewController : UIViewController, UITableViewDataSource, UITableV
         let cell = tableView.dequeueReusableCell(withIdentifier: String(describing: ContactCell.self), for: indexPath) as! ContactCell
         if indexPath.section == 0 {
             if indexPath.row == 0 {
-                cell.updateWith(image: UIImage(named: "group_chat")!, title: "群聊")
+                cell.updateWith(localImage: UIImage(named: "group_chat")!, title: "群聊")
             } else if indexPath.row == 1 {
-                cell.updateWith(image: UIImage(named: "tag")!, title: "标签")
+                cell.updateWith(localImage: UIImage(named: "tag")!, title: "标签")
             }
+        } else if indexPath.section == 1 {
+            cell.updateWith(imageUrl: self.friendInfos![indexPath.row].avatarUrl, title: (self.friendInfos![indexPath.row].noteName != nil) ? self.friendInfos![indexPath.row].noteName! : self.friendInfos![indexPath.row].nickName)
         }
         return cell
     }
@@ -126,9 +142,23 @@ class ContactCell : UITableViewCell {
     }
     
     // MARK: Custom
-    func updateWith(image: UIImage, title: String) {
-        self.avatarImageView.image = image
+    func updateWith(localImage: UIImage, title: String) {
+        self.avatarImageView.image = localImage
         self.titleLabel.text = title
+    }
+    
+    func updateWith(imageUrl: String?, title: String) {
+        self.titleLabel.text = title
+        if let imageUrl = URL(string: imageUrl ?? "error_avartar_url") {
+            AF.request(imageUrl).responseImage { response in
+                switch response.result {
+                case .success(let image):
+                    self.avatarImageView.image = image
+                case .failure(_):
+                    self.avatarImageView.image = UIImage(named: "default_avatar")
+                }
+            }
+        }
     }
     
     // MARK: Getter
@@ -154,4 +184,9 @@ class ContactCell : UITableViewCell {
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
+}
+
+struct FriendListResponse: Decodable {
+    let code: Int
+    let data: [FriendInfo]
 }

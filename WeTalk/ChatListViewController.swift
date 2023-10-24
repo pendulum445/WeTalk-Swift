@@ -10,7 +10,7 @@ import UIKit
 
 class ChatListViewController : UIViewController, UITableViewDataSource, UITableViewDelegate, NavigationBarViewDelegate {
     
-    var chatCellModels: [ChatCellModel] = []
+    var chatCellModels: [ChatCellModel]?
     
     // MARK: Life Cycle
     override func viewDidLoad() {
@@ -51,12 +51,12 @@ class ChatListViewController : UIViewController, UITableViewDataSource, UITableV
     
     // MARK: UITableViewDataSource
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return self.chatCellModels.count
+        return self.chatCellModels?.count ?? 0
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: String(describing: ChatCell.self), for: indexPath) as! ChatCell
-        cell.updateWithModel(model: self.chatCellModels[indexPath.row])
+        cell.updateWithModel(model: self.chatCellModels![indexPath.row])
         return cell
     }
     
@@ -66,7 +66,7 @@ class ChatListViewController : UIViewController, UITableViewDataSource, UITableV
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let vc = ChatViewController(friendInfo: self.chatCellModels[indexPath.row].friendInfo)
+        let vc = ChatViewController(friendInfo: self.chatCellModels![indexPath.row].friendInfo)
         self.navigationController?.pushViewController(vc, animated: true)
     }
     
