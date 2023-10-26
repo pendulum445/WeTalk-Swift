@@ -57,7 +57,7 @@ class ChatViewController : UIViewController, NavigationBarViewDelegate {
     
     // MARK: Getter
     private lazy var navigationBarView: FriendNavigationBar = {
-        let view = FriendNavigationBar(title: (friendInfo?.noteName ?? friendInfo?.nickName) ?? "")
+        let view = FriendNavigationBar(title: friendInfo!.displayName())
         view.delegate = self
         view.translatesAutoresizingMaskIntoConstraints = false
         return view

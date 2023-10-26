@@ -11,7 +11,8 @@ import UIKit
 
 class ContactsViewController : UIViewController, UITableViewDataSource, UITableViewDelegate, NavigationBarViewDelegate {
     
-    var friendInfos: [FriendInfo]?
+    var groupedFriendInfo: [String: [FriendInfo]] = [:]
+    var sectionLetters: [String] = []
     
     // MARK: Life Cycle
     override func viewDidLoad() {
@@ -45,7 +46,7 @@ class ContactsViewController : UIViewController, UITableViewDataSource, UITableV
         AF.request("https://mock.apifox.cn/m1/2415634-0-default/friendList?userId=<userId>").responseDecodable(of: FriendListResponse.self) { response in
             switch response.result {
             case .success(let friendListResponse):
-                self.friendInfos = friendListResponse.data
+                self.splitDataByCharacter(data: friendListResponse.data)
                 self.tableView.reloadData()
             case .failure(let error):
                 print(error)
@@ -54,12 +55,42 @@ class ContactsViewController : UIViewController, UITableViewDataSource, UITableV
         }
     }
     
+    func splitDataByCharacter(data: [FriendInfo]) {
+        for it in data {
+            var firstLetter = self.firstLetterOf(string: it.displayName())
+            if !("a"..."z").contains(firstLetter) {
+                firstLetter = "#"
+            }
+            if self.groupedFriendInfo[firstLetter] == nil {
+                self.groupedFriendInfo[firstLetter] = []
+            }
+            self.groupedFriendInfo[firstLetter]?.append(it)
+        }
+        for it in self.groupedFriendInfo.keys {
+            self.sectionLetters.append(it)
+        }
+        self.sectionLetters.sort()
+    }
+    
+    func firstLetterOf(string: String) -> String {
+        let mutableString = NSMutableString(string: string) as CFMutableString
+        CFStringTransform(mutableString, nil, kCFStringTransformMandarinLatin, false)
+        CFStringTransform(mutableString, nil, kCFStringTransformStripDiacritics, false)
+        let pinyinString = mutableString as String
+        let firstLetter = String(pinyinString[pinyinString.startIndex]).uppercased()
+        return firstLetter
+    }
+    
+    func friendInfoAt(indexPath: IndexPath) -> FriendInfo {
+        return self.groupedFriendInfo[self.sectionLetters[indexPath.section - 1]]![indexPath.row]
+    }
+    
     // MARK: UITableViewDataSource
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if section == 0 {
             return 2
         } else {
-            return self.friendInfos?.count ?? 0
+            return self.groupedFriendInfo[self.sectionLetters[section - 1]]?.count ?? 0
         }
     }
     
@@ -72,13 +103,14 @@ class ContactsViewController : UIViewController, UITableViewDataSource, UITableV
                 cell.updateWith(localImage: UIImage(named: "tag")!, title: "标签")
             }
         } else if indexPath.section == 1 {
-            cell.updateWith(imageUrl: self.friendInfos![indexPath.row].avatarUrl, title: (self.friendInfos![indexPath.row].noteName != nil) ? self.friendInfos![indexPath.row].noteName! : self.friendInfos![indexPath.row].nickName)
+            let friendInfo = self.friendInfoAt(indexPath: indexPath)
+            cell.updateWith(imageUrl: friendInfo.avatarUrl, title: friendInfo.displayName())
         }
         return cell
     }
     
     func numberOfSections(in tableView: UITableView) -> Int {
-        return 2
+        return 1 + self.groupedFriendInfo.keys.count
     }
     
     // MARK: UITableViewDelegate

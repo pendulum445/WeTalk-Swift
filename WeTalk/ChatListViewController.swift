@@ -140,10 +140,11 @@ class ChatCell: UITableViewCell {
     
     // MARK: Custom
     func updateWithModel(model: ChatCellModel) {
-        self.titleLabel.text = (model.friendInfo.noteName != nil) ? model.friendInfo.noteName : model.friendInfo.nickName
+        self.titleLabel.text = model.friendInfo.displayName()
         self.summaryLabel.text = model.lastChat
         if model.unreadCount == 0 {
             self.redDotLabel.isHidden = true
+            self.redDotLabel.text = "0"
         } else if model.unreadCount < 100 {
             self.redDotLabel.isHidden = false
             self.redDotLabel.text = String("\(model.unreadCount)")
@@ -255,9 +256,13 @@ struct ChatCellModel: Decodable {
     let unreadCount: Int
 }
 
-struct FriendInfo: Decodable {
+class FriendInfo: Decodable {
     let avatarUrl: String?
     let nickName: String
     let noteName: String?
     let userId: String
+    
+    func displayName() -> String {
+        return self.noteName ?? self.nickName;
+    }
 }
