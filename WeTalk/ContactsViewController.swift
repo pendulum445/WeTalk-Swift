@@ -122,6 +122,14 @@ class ContactsViewController : UIViewController, UITableViewDataSource, UITableV
         
     }
     
+    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        return section > 0 ? ContactHeaderView(title: self.sectionLetters[section - 1]) : nil
+    }
+
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        return section > 0 ? 22 : 0
+    }
+    
     // MARK: NavigationBarViewDelegate
     func didClickNavigationBarFirstRightButton() {
         // TODO: 点击搜索按钮
@@ -224,7 +232,34 @@ class ContactCell : UITableViewCell {
     }()
 }
 
-struct FriendListResponse: Decodable {
+class ContactHeaderView : UIView {
+    
+    // MARK: Life Cycle
+    init(title: String) {
+        super.init(frame: CGRectZero)
+        self.addSubview(self.titleLabel)
+        self.titleLabel.text = title
+        self.titleLabel.sizeToFit()
+        NSLayoutConstraint.activate([
+            self.titleLabel.leftAnchor.constraint(equalTo: self.leftAnchor, constant: 16),
+            self.titleLabel.centerYAnchor.constraint(equalTo: self.centerYAnchor)
+        ])
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    private lazy var titleLabel: UILabel = {
+        let label = UILabel()
+        label.textColor = .black.withAlphaComponent(0.5)
+        label.font = UIFont(name: "PingFangSC-Regular", size: 12)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+}
+
+struct FriendListResponse : Decodable {
     let code: Int
     let data: [FriendInfo]
 }
