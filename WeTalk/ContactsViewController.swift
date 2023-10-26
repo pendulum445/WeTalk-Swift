@@ -46,7 +46,7 @@ class ContactsViewController : UIViewController, UITableViewDataSource, UITableV
         AF.request("https://mock.apifox.cn/m1/2415634-0-default/friendList?userId=<userId>").responseDecodable(of: FriendListResponse.self) { response in
             switch response.result {
             case .success(let friendListResponse):
-                self.splitDataByCharacter(data: friendListResponse.data)
+                self.groupDataByFirstLetter(data: friendListResponse.data)
                 self.tableView.reloadData()
             case .failure(let error):
                 print(error)
@@ -55,7 +55,7 @@ class ContactsViewController : UIViewController, UITableViewDataSource, UITableV
         }
     }
     
-    func splitDataByCharacter(data: [FriendInfo]) {
+    func groupDataByFirstLetter(data: [FriendInfo]) {
         for it in data {
             var firstLetter = self.firstLetterOf(string: it.displayName())
             if !("a"..."z").contains(firstLetter) {
