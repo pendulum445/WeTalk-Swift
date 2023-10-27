@@ -58,7 +58,7 @@ class ContactsViewController : UIViewController, UITableViewDataSource, UITableV
     private func groupDataByFirstLetter(data: [FriendInfo]) {
         for it in data {
             var firstLetter = self.firstLetterOf(string: it.displayName())
-            if !("a"..."z").contains(firstLetter) {
+            if !("A"..."Z").contains(firstLetter) {
                 firstLetter = "#"
             }
             if self.groupedFriendInfo[firstLetter] == nil {
@@ -107,7 +107,7 @@ class ContactsViewController : UIViewController, UITableViewDataSource, UITableV
             } else if indexPath.row == 1 {
                 cell.updateWith(localImage: "tag", title: "标签")
             }
-        } else if indexPath.section == 1 {
+        } else {
             let friendInfo = self.friendInfoAt(indexPath: indexPath)
             cell.updateWith(imageUrl: friendInfo.avatarUrl, title: friendInfo.displayName())
         }
