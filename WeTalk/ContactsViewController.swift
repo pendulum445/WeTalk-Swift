@@ -152,6 +152,9 @@ class ContactsViewController : UIViewController, UITableViewDataSource, UITableV
         tableView.delegate = self
         tableView.dataSource = self
         tableView.separatorStyle = .none
+        if #available(iOS 15.0, *) {
+            tableView.sectionHeaderTopPadding = 0
+        }
         tableView.register(ContactCell.self, forCellReuseIdentifier: String(describing: ContactCell.self))
         tableView.translatesAutoresizingMaskIntoConstraints = false
         return tableView
@@ -238,6 +241,7 @@ class ContactHeaderView : UIView {
     init(title: String) {
         super.init(frame: CGRectZero)
         self.addSubview(self.titleLabel)
+        self.backgroundColor = UIColor(red: 233.0/255.0, green: 233.0/255.0, blue: 233.0/255.0, alpha: 1.0)
         self.titleLabel.text = title
         self.titleLabel.sizeToFit()
         NSLayoutConstraint.activate([
