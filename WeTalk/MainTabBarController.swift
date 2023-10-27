@@ -12,6 +12,8 @@ class MainTabBarController: UITabBarController {
     // MARK: Life Cycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.tabBar.tintColor = UIColor(red: 0.027, green: 0.757, blue: 0.376, alpha: 1)
+        self.tabBar.backgroundColor = UIColor(red: 233.0/255.0, green: 233.0/255.0, blue: 233.0/255.0, alpha: 1.0)
         self.viewControllers = [self.messageListViewController, self.contactsViewController, self.discoverViewController, self.profileViewController]
     }
     
