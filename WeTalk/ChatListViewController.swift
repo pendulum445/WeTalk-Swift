@@ -155,7 +155,7 @@ class ChatCell: UITableViewCell {
         let text = self.redDotLabel.text! as NSString
         let textSize = text.size(withAttributes: [.font: self.redDotLabel.font!])
         NSLayoutConstraint.activate([
-            self.redDotLabel.widthAnchor.constraint(equalToConstant: textSize.width+5*2)
+            self.redDotLabel.widthAnchor.constraint(equalToConstant: max(textSize.width+5*2, 18))
         ])
         self.timeLabel.text = self.getLastChatTimeText(lastChatTime: model.lastChatTime)
         self.timeLabel.sizeToFit()

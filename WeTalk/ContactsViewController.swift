@@ -83,7 +83,7 @@ class ContactsViewController : UIViewController, UITableViewDataSource, UITableV
         if !isAlphabetic {
             return "#"
         }
-        return String(firstCharacter)
+        return String(firstCharacter).uppercased()
     }
     
     private func friendInfoAt(indexPath: IndexPath) -> FriendInfo {
