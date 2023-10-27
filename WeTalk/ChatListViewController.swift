@@ -10,7 +10,7 @@ import UIKit
 
 class ChatListViewController : UIViewController, UITableViewDataSource, UITableViewDelegate, NavigationBarViewDelegate {
     
-    var chatCellModels: [ChatCellModel]?
+    private var chatCellModels: [ChatCellModel]?
     
     // MARK: Life Cycle
     override func viewDidLoad() {
@@ -40,7 +40,7 @@ class ChatListViewController : UIViewController, UITableViewDataSource, UITableV
     }
     
     // MARK: Custom
-    func requestData() {
+    private func requestData() {
         AF.request("https://mock.apifox.cn/m1/2415634-0-default/chatList?userId={% mock 'qq' %}").responseDecodable(of: ChatListResponse.self) { response in
             if case .success(let chatListResponse) = response.result {
                 self.chatCellModels = chatListResponse.data
@@ -162,7 +162,7 @@ class ChatCell: UITableViewCell {
         self.contentView.setNeedsLayout()
     }
     
-    func getLastChatTimeText(lastChatTime: String) -> String {
+    private func getLastChatTimeText(lastChatTime: String) -> String {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yy-MM-dd HH:mm:ss"
         if let date = dateFormatter.date(from: lastChatTime) {

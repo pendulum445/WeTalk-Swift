@@ -9,7 +9,7 @@ import UIKit
 
 class ChatViewController : UIViewController, NavigationBarViewDelegate {
     
-    var friendInfo: FriendInfo?
+    private var friendInfo: FriendInfo?
     
     // MARK: Life Cycle
     init(friendInfo: FriendInfo) {

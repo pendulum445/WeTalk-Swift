@@ -11,8 +11,8 @@ import UIKit
 
 class ContactsViewController : UIViewController, UITableViewDataSource, UITableViewDelegate, NavigationBarViewDelegate {
     
-    var groupedFriendInfo: [String: [FriendInfo]] = [:]
-    var sectionLetters: [String] = []
+    private var groupedFriendInfo: [String: [FriendInfo]] = [:]
+    private var sectionLetters: [String] = []
     
     // MARK: Life Cycle
     override func viewDidLoad() {
@@ -42,7 +42,7 @@ class ContactsViewController : UIViewController, UITableViewDataSource, UITableV
     }
     
     // MARK: Custom
-    func requestData() {
+    private func requestData() {
         AF.request("https://mock.apifox.cn/m1/2415634-0-default/friendList?userId=<userId>").responseDecodable(of: FriendListResponse.self) { response in
             switch response.result {
             case .success(let friendListResponse):
@@ -55,7 +55,7 @@ class ContactsViewController : UIViewController, UITableViewDataSource, UITableV
         }
     }
     
-    func groupDataByFirstLetter(data: [FriendInfo]) {
+    private func groupDataByFirstLetter(data: [FriendInfo]) {
         for it in data {
             var firstLetter = self.firstLetterOf(string: it.displayName())
             if !("a"..."z").contains(firstLetter) {
@@ -72,7 +72,7 @@ class ContactsViewController : UIViewController, UITableViewDataSource, UITableV
         self.sectionLetters.sort()
     }
     
-    func firstLetterOf(string: String) -> String {
+    private func firstLetterOf(string: String) -> String {
         let mutableString = NSMutableString(string: string) as CFMutableString
         CFStringTransform(mutableString, nil, kCFStringTransformMandarinLatin, false)
         CFStringTransform(mutableString, nil, kCFStringTransformStripDiacritics, false)
@@ -86,7 +86,7 @@ class ContactsViewController : UIViewController, UITableViewDataSource, UITableV
         return String(firstCharacter)
     }
     
-    func friendInfoAt(indexPath: IndexPath) -> FriendInfo {
+    private func friendInfoAt(indexPath: IndexPath) -> FriendInfo {
         return self.groupedFriendInfo[self.sectionLetters[indexPath.section - 1]]![indexPath.row]
     }
     
