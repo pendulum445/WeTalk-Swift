@@ -76,9 +76,14 @@ class ContactsViewController : UIViewController, UITableViewDataSource, UITableV
         let mutableString = NSMutableString(string: string) as CFMutableString
         CFStringTransform(mutableString, nil, kCFStringTransformMandarinLatin, false)
         CFStringTransform(mutableString, nil, kCFStringTransformStripDiacritics, false)
-        let pinyinString = mutableString as String
-        let firstLetter = String(pinyinString[pinyinString.startIndex]).uppercased()
-        return firstLetter
+        let convertedString = mutableString as String
+        let firstCharacter = convertedString.prefix(1)
+        let regex = try! NSRegularExpression(pattern: "[a-zA-Z]", options: [])
+        let isAlphabetic = regex.firstMatch(in: String(firstCharacter), options: [], range: NSRange(location: 0, length: firstCharacter.utf16.count)) != nil
+        if !isAlphabetic {
+            return "#"
+        }
+        return String(firstCharacter)
     }
     
     func friendInfoAt(indexPath: IndexPath) -> FriendInfo {
@@ -125,7 +130,7 @@ class ContactsViewController : UIViewController, UITableViewDataSource, UITableV
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         return section > 0 ? ContactHeaderView(title: self.sectionLetters[section - 1]) : nil
     }
-
+    
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         return section > 0 ? 22 : 0
     }
@@ -266,4 +271,11 @@ class ContactHeaderView : UIView {
 struct FriendListResponse : Decodable {
     let code: Int
     let data: [FriendInfo]
+}
+
+extension String {
+    var isChinese: Bool {
+        let range = self.range(of: "\\p{Han}", options: .regularExpression)
+        return range != nil
+    }
 }
