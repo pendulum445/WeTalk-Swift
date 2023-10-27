@@ -103,9 +103,9 @@ class ContactsViewController : UIViewController, UITableViewDataSource, UITableV
         let cell = tableView.dequeueReusableCell(withIdentifier: String(describing: ContactCell.self), for: indexPath) as! ContactCell
         if indexPath.section == 0 {
             if indexPath.row == 0 {
-                cell.updateWith(localImage: UIImage(named: "group_chat")!, title: "群聊")
+                cell.updateWith(localImage: "group_chat", title: "群聊")
             } else if indexPath.row == 1 {
-                cell.updateWith(localImage: UIImage(named: "tag")!, title: "标签")
+                cell.updateWith(localImage: "tag", title: "标签")
             }
         } else if indexPath.section == 1 {
             let friendInfo = self.friendInfoAt(indexPath: indexPath)
@@ -196,9 +196,8 @@ class ContactCell : UITableViewCell {
     }
     
     // MARK: Custom
-    func updateWith(localImage: UIImage, title: String) {
-        self.avatarImageView.image = localImage
-        self.titleLabel.text = title
+    func updateWith(localImage: String, title: String) {
+        self.updateWith(image: UIImage(named: localImage)!, title: title)
     }
     
     func updateWith(imageUrl: String?, title: String) {
@@ -207,12 +206,17 @@ class ContactCell : UITableViewCell {
             AF.request(imageUrl).responseImage { response in
                 switch response.result {
                 case .success(let image):
-                    self.avatarImageView.image = image
+                    self.updateWith(image: image, title: title)
                 case .failure(_):
-                    self.avatarImageView.image = UIImage(named: "default_avatar")
+                    self.updateWith(localImage: "default_avatar", title: title)
                 }
             }
         }
+    }
+    
+    private func updateWith(image: UIImage, title: String) {
+        self.avatarImageView.image = image
+        self.titleLabel.text = title
     }
     
     // MARK: Getter
@@ -271,11 +275,4 @@ class ContactHeaderView : UIView {
 struct FriendListResponse : Decodable {
     let code: Int
     let data: [FriendInfo]
-}
-
-extension String {
-    var isChinese: Bool {
-        let range = self.range(of: "\\p{Han}", options: .regularExpression)
-        return range != nil
-    }
 }
