@@ -160,6 +160,7 @@ class ContactsViewController : UIViewController, UITableViewDataSource, UITableV
         if #available(iOS 15.0, *) {
             tableView.sectionHeaderTopPadding = 0
         }
+        tableView.showsVerticalScrollIndicator = false
         tableView.register(ContactCell.self, forCellReuseIdentifier: String(describing: ContactCell.self))
         tableView.translatesAutoresizingMaskIntoConstraints = false
         return tableView
