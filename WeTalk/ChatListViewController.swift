@@ -6,6 +6,7 @@
 //
 
 import Alamofire
+import AlamofireImage
 import UIKit
 
 class ChatListViewController : UIViewController, UITableViewDataSource, UITableViewDelegate, NavigationBarViewDelegate {
@@ -161,6 +162,16 @@ class ChatCell: UITableViewCell {
         ])
         self.timeLabel.text = self.getLastChatTimeText(lastChatTime: model.lastChatTime)
         self.timeLabel.sizeToFit()
+        if let imageUrl = URL(string: model.friendInfo.avatarUrl ?? "error_avartar_url") {
+            AF.request(imageUrl).responseImage { response in
+                switch response.result {
+                case .success(let image):
+                    self.avatarImageView.image = image
+                case .failure(_):
+                    self.avatarImageView.image = UIImage(named: "default_avatar")
+                }
+            }
+        }
         self.contentView.setNeedsLayout()
     }
     
