@@ -257,25 +257,32 @@ class ChatCell: UITableViewCell {
     }()
 }
 
-struct ChatListResponse: Decodable {
+struct ChatListResponse : Decodable {
     let code: Int
     let data: [ChatCellModel]
 }
 
-struct ChatCellModel: Decodable {
+struct ChatCellModel : Decodable {
     let friendInfo: FriendInfo
     let lastChat: String?
     let lastChatTime: String
     let unreadCount: Int
 }
 
-class FriendInfo: Decodable {
+class FriendInfo : Decodable {
     let avatarUrl: String?
     let nickName: String
     let noteName: String?
     let userId: String
+    let messages: [ChatMessage]
     
     func displayName() -> String {
         return self.noteName ?? self.nickName;
     }
+}
+
+struct ChatMessage : Decodable {
+    let chatTime: String
+    let text: String
+    let type: Int
 }

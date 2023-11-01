@@ -7,7 +7,7 @@
 
 import UIKit
 
-class ChatViewController : UIViewController, NavigationBarViewDelegate {
+class ChatViewController : UIViewController, UITableViewDataSource, UITableViewDelegate, NavigationBarViewDelegate {
     
     private var friendInfo: FriendInfo?
     
@@ -26,6 +26,9 @@ class ChatViewController : UIViewController, NavigationBarViewDelegate {
         self.view.backgroundColor = UIColor(red: 233.0/255.0, green: 233.0/255.0, blue: 233.0/255.0, alpha: 1.0)
         self.view.addSubview(self.navigationBarView)
         self.view.addSubview(self.inputBarView)
+        self.view.addSubview(self.tableView)
+        self.tableView.reloadData()
+        self.tableView.scrollToRow(at: IndexPath(row: 19, section: 0), at: .bottom, animated: false)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -37,13 +40,33 @@ class ChatViewController : UIViewController, NavigationBarViewDelegate {
         NSLayoutConstraint.activate([
             self.navigationBarView.centerXAnchor.constraint(equalTo: self.view.centerXAnchor),
             self.navigationBarView.topAnchor.constraint(equalTo: self.view.topAnchor, constant: statusBarHeight),
-            self.navigationBarView.widthAnchor.constraint(equalToConstant: UIScreen.main.bounds.width),
+            self.navigationBarView.widthAnchor.constraint(equalTo: self.view.widthAnchor),
             self.navigationBarView.heightAnchor.constraint(equalToConstant: 44),
             self.inputBarView.centerXAnchor.constraint(equalTo: self.view.centerXAnchor),
             self.inputBarView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
             self.inputBarView.widthAnchor.constraint(equalTo: self.view.widthAnchor),
-            self.inputBarView.heightAnchor.constraint(equalToConstant: 56+34)
+            self.inputBarView.heightAnchor.constraint(equalToConstant: 56+34),
+            self.tableView.centerXAnchor.constraint(equalTo: self.view.centerXAnchor),
+            self.tableView.topAnchor.constraint(equalTo: self.navigationBarView.bottomAnchor),
+            self.tableView.bottomAnchor.constraint(equalTo: self.inputBarView.topAnchor),
+            self.tableView.widthAnchor.constraint(equalTo: self.view.widthAnchor)
         ])
+    }
+    
+    // MARK: UITableViewDataSource
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return 20
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: String(describing: FriendMessageCell.self), for: indexPath) as! FriendMessageCell
+        
+        return cell
+    }
+    
+    // MARK: UITableViewDelegate
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
     }
     
     // MARK: NavigationBarViewDelegate
@@ -67,6 +90,21 @@ class ChatViewController : UIViewController, NavigationBarViewDelegate {
         let inputView = InputBarView()
         inputView.translatesAutoresizingMaskIntoConstraints = false
         return inputView
+    }()
+    
+    private lazy var tableView: UITableView = {
+        let tableView = UITableView(frame: CGRectZero)
+        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.separatorStyle = .none
+        tableView.showsVerticalScrollIndicator = false
+        tableView.rowHeight = 56
+        tableView.estimatedRowHeight = UITableView.automaticDimension
+//        tableView.transform = CGAffineTransform(rotationAngle: CGFloat(Double.pi))
+        tableView.register(FriendMessageCell.self, forCellReuseIdentifier: String(describing: FriendMessageCell.self))
+        tableView.backgroundColor = UIColor(red: 233.0/255.0, green: 233.0/255.0, blue: 233.0/255.0, alpha: 1.0)
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        return tableView
     }()
 }
 
@@ -144,5 +182,69 @@ class InputBarView : UIView {
         textField.backgroundColor = .white
         textField.translatesAutoresizingMaskIntoConstraints = false
         return textField
+    }()
+}
+
+class FriendMessageCell : UITableViewCell {
+    
+    // MARK: Life Cycle
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+        self.contentView.backgroundColor = UIColor(red: 233.0/255.0, green: 233.0/255.0, blue: 233.0/255.0, alpha: 1.0)
+//        self.contentView.transform = CGAffineTransform(rotationAngle: CGFloat(-Double.pi))
+        self.contentView.addSubview(self.avatarImageView)
+        self.contentView.addSubview(self.cornerImageView)
+        self.contentView.addSubview(self.messageTextView)
+        NSLayoutConstraint.activate([
+            self.avatarImageView.leftAnchor.constraint(equalTo: self.contentView.leftAnchor, constant: 16),
+            self.avatarImageView.topAnchor.constraint(equalTo: self.contentView.topAnchor),
+            self.avatarImageView.widthAnchor.constraint(equalToConstant: 40),
+            self.avatarImageView.heightAnchor.constraint(equalToConstant: 40),
+            self.cornerImageView.leftAnchor.constraint(equalTo: self.avatarImageView.rightAnchor, constant: 4),
+            self.cornerImageView.centerYAnchor.constraint(equalTo: self.avatarImageView.centerYAnchor),
+            self.cornerImageView.widthAnchor.constraint(equalToConstant: 26),
+            self.cornerImageView.heightAnchor.constraint(equalToConstant: 22),
+            self.messageTextView.leftAnchor.constraint(equalTo: self.avatarImageView.rightAnchor, constant: 10),
+            self.messageTextView.rightAnchor.constraint(lessThanOrEqualTo: self.contentView.rightAnchor, constant: -16),
+            self.messageTextView.topAnchor.constraint(equalTo: self.contentView.topAnchor),
+            self.messageTextView.bottomAnchor.constraint(equalTo: self.contentView.bottomAnchor, constant: -16),
+            self.messageTextView.heightAnchor.constraint(greaterThanOrEqualToConstant: 40),
+        ])
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    // MARK: Custom
+    
+    // MARK: Getter
+    private lazy var avatarImageView: UIImageView = {
+        let imageView = UIImageView(image: UIImage(named: "default_avatar"))
+        imageView.clipsToBounds = true
+        imageView.layer.cornerRadius = 4
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        return imageView
+    }()
+    
+    private lazy var cornerImageView: UIImageView = {
+        let imageView = UIImageView(image: UIImage(named: "chat_left_corner"))
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        return imageView
+    }()
+    
+    private lazy var messageTextView: UITextView = {
+        let textView = UITextView()
+        textView.text = "这是一条测试消息哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈"
+        textView.textColor = .black
+        textView.clipsToBounds = true
+        textView.layer.cornerRadius = 4
+        textView.backgroundColor = .white
+        textView.isEditable = false
+        textView.isScrollEnabled = false
+        textView.font = UIFont(name: "PingFangSC-Regular", size: 17)
+        textView.contentInset = UIEdgeInsets(top: 8, left: 10, bottom: 8, right: 8)
+        textView.translatesAutoresizingMaskIntoConstraints = false
+        return textView
     }()
 }
