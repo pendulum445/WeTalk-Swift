@@ -19,11 +19,6 @@ class ChatListViewController : UIViewController, UITableViewDataSource, UITableV
         self.view.backgroundColor = UIColor(red: 233.0/255.0, green: 233.0/255.0, blue: 233.0/255.0, alpha: 1.0)
         self.view.addSubview(self.navigationBarView)
         self.view.addSubview(self.tableView)
-        self.requestData()
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
         var statusBarHeight: CGFloat = 0
         if let statusBarManager = UIApplication.shared.windows.first?.windowScene?.statusBarManager {
             statusBarHeight = statusBarManager.statusBarFrame.height
@@ -38,6 +33,7 @@ class ChatListViewController : UIViewController, UITableViewDataSource, UITableV
             self.tableView.topAnchor.constraint(equalTo: self.navigationBarView.bottomAnchor),
             self.tableView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor)
         ])
+        self.requestData()
     }
     
     // MARK: Custom
@@ -118,15 +114,17 @@ class ChatCell: UITableViewCell {
             self.avatarImageView.widthAnchor.constraint(equalToConstant: 48),
             self.avatarImageView.heightAnchor.constraint(equalToConstant: 48),
             self.titleLabel.leftAnchor.constraint(equalTo: self.avatarImageView.rightAnchor, constant: 12),
+            self.titleLabel.rightAnchor.constraint(lessThanOrEqualTo: self.timeLabel.leftAnchor, constant: -16),
             self.titleLabel.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 14),
-            self.titleLabel.widthAnchor.constraint(equalTo: self.contentView.widthAnchor, constant: -76-120),
             self.titleLabel.heightAnchor.constraint(equalToConstant: 24),
             self.redDotLabel.rightAnchor.constraint(equalTo: self.titleLabel.leftAnchor, constant: -7),
             self.redDotLabel.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 7),
+            self.redDotLabel.widthAnchor.constraint(greaterThanOrEqualToConstant: 18),
+            self.redDotLabel.widthAnchor.constraint(lessThanOrEqualToConstant: 42),
             self.redDotLabel.heightAnchor.constraint(equalToConstant: 18),
             self.summaryLabel.leftAnchor.constraint(equalTo: self.titleLabel.leftAnchor),
             self.summaryLabel.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 38),
-            self.summaryLabel.widthAnchor.constraint(equalTo: self.titleLabel.widthAnchor),
+            self.summaryLabel.rightAnchor.constraint(lessThanOrEqualTo: self.timeLabel.leftAnchor, constant: -16),
             self.summaryLabel.heightAnchor.constraint(equalToConstant: 20),
             self.timeLabel.rightAnchor.constraint(equalTo: self.contentView.rightAnchor, constant: -16),
             self.timeLabel.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 19),
@@ -144,7 +142,11 @@ class ChatCell: UITableViewCell {
     // MARK: Custom
     func updateWithModel(model: ChatCellModel) {
         self.titleLabel.text = model.friendInfo.displayName()
-        self.summaryLabel.text = model.lastChat
+        if model.friendInfo.messages.count > 0 {
+            self.summaryLabel.text = model.friendInfo.messages[model.friendInfo.messages.count-1].text
+        } else {
+            self.summaryLabel.text = ""
+        }
         if model.unreadCount == 0 {
             self.redDotLabel.isHidden = true
             self.redDotLabel.text = "0"
@@ -155,13 +157,7 @@ class ChatCell: UITableViewCell {
             self.redDotLabel.isHidden = false
             self.redDotLabel.text = "99+"
         }
-        let text = self.redDotLabel.text! as NSString
-        let textSize = text.size(withAttributes: [.font: self.redDotLabel.font!])
-        NSLayoutConstraint.activate([
-            self.redDotLabel.widthAnchor.constraint(equalToConstant: max(textSize.width+5*2, 18))
-        ])
         self.timeLabel.text = self.getLastChatTimeText(lastChatTime: model.lastChatTime)
-        self.timeLabel.sizeToFit()
         if let imageUrl = URL(string: model.friendInfo.avatarUrl ?? "error_avartar_url") {
             AF.request(imageUrl).responseImage { response in
                 switch response.result {
@@ -241,7 +237,6 @@ class ChatCell: UITableViewCell {
     
     private lazy var timeLabel: UILabel = {
         let label = UILabel()
-        label.text = "12:21"
         label.textColor = .black.withAlphaComponent(0.3)
         label.font = UIFont(name: "PingFangSC-Regular", size: 12)
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -264,7 +259,6 @@ struct ChatListResponse : Decodable {
 
 struct ChatCellModel : Decodable {
     let friendInfo: FriendInfo
-    let lastChat: String?
     let lastChatTime: String
     let unreadCount: Int
 }
