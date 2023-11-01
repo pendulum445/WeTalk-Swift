@@ -64,8 +64,12 @@ class ChatListViewController : UIViewController, UITableViewDataSource, UITableV
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        let vc = ChatViewController(friendInfo: self.chatCellModels![indexPath.row].friendInfo)
-        self.navigationController?.pushViewController(vc, animated: true)
+        if self.chatCellModels![indexPath.row].unreadCount > 0 {
+            self.chatCellModels![indexPath.row].unreadCount = 0
+            let cell = tableView.cellForRow(at: indexPath) as! ChatCell
+            cell.updateUnreadRedDotWith(unreadCount: 0)
+        }
+        self.navigationController?.pushViewController(ChatViewController(friendInfo: self.chatCellModels![indexPath.row].friendInfo), animated: true)
     }
     
     // MARK: NavigationBarViewDelegate
@@ -149,16 +153,7 @@ class ChatCell: UITableViewCell {
             self.summaryLabel.text = ""
             self.timeLabel.text = ""
         }
-        if model.unreadCount == 0 {
-            self.redDotLabel.isHidden = true
-            self.redDotLabel.text = "0"
-        } else if model.unreadCount < 100 {
-            self.redDotLabel.isHidden = false
-            self.redDotLabel.text = String("\(model.unreadCount)")
-        } else {
-            self.redDotLabel.isHidden = false
-            self.redDotLabel.text = "99+"
-        }
+        self.updateUnreadRedDotWith(unreadCount: model.unreadCount)
         if let imageUrl = URL(string: model.friendInfo.avatarUrl ?? "error_avartar_url") {
             AF.request(imageUrl).responseImage { response in
                 switch response.result {
@@ -170,6 +165,19 @@ class ChatCell: UITableViewCell {
             }
         }
         self.contentView.setNeedsLayout()
+    }
+    
+    func updateUnreadRedDotWith(unreadCount: Int) {
+        if unreadCount == 0 {
+            self.redDotLabel.isHidden = true
+            self.redDotLabel.text = "0"
+        } else if unreadCount < 100 {
+            self.redDotLabel.isHidden = false
+            self.redDotLabel.text = String("\(unreadCount)")
+        } else {
+            self.redDotLabel.isHidden = false
+            self.redDotLabel.text = "99+"
+        }
     }
     
     private func getLastChatTimeText(lastChatTime: String) -> String {
@@ -260,7 +268,7 @@ struct ChatListResponse : Decodable {
 
 struct ChatCellModel : Decodable {
     let friendInfo: FriendInfo
-    let unreadCount: Int
+    var unreadCount: Int
 }
 
 class FriendInfo : Decodable {
