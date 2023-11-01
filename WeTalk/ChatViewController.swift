@@ -5,8 +5,10 @@
 //  Created by liaoyunjie on 2023/10/8.
 //
 
-import UIKit
+import Alamofire
+import AlamofireImage
 import Dispatch
+import UIKit
 
 class ChatViewController : UIViewController, UITableViewDataSource, UITableViewDelegate, NavigationBarViewDelegate {
     
@@ -58,21 +60,23 @@ class ChatViewController : UIViewController, UITableViewDataSource, UITableViewD
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if !self.hasScrolledToBottom {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.005) {
-                //                if self.chatData.count > 0 {
-                let indexPath = IndexPath(row: self.tableView.numberOfRows(inSection: 0) - 1, section: 0)
-                self.tableView.scrollToRow(at: indexPath, at: .bottom, animated: false)
-                //                }
+                if (self.friendInfo?.messages.count ?? 0) > 0 {
+                    let indexPath = IndexPath(row: self.tableView.numberOfRows(inSection: 0) - 1, section: 0)
+                    self.tableView.scrollToRow(at: indexPath, at: .bottom, animated: false)
+                }
             }
         }
-        return 20
+        return self.friendInfo?.messages.count ?? 0
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        if indexPath.row % 2 == 0 {
+        if self.friendInfo!.messages[indexPath.row].type == 0 {
             let cell = tableView.dequeueReusableCell(withIdentifier: "FriendMessageCell", for: indexPath) as! FriendMessageCell
+            cell.updateWith(avatarUrl: self.friendInfo!.avatarUrl ?? "error_avatar_url", message: self.friendInfo!.messages[indexPath.row].text)
             return cell
         } else {
             let cell = tableView.dequeueReusableCell(withIdentifier: "SelfMessageCell", for: indexPath) as! SelfMessageCell
+            cell.updateWith(avatarUrl: self.friendInfo!.avatarUrl ?? "error_avatar_url", message: self.friendInfo!.messages[indexPath.row].text)
             return cell
         }
     }
@@ -231,6 +235,19 @@ class FriendMessageCell : UITableViewCell {
     }
     
     // MARK: Custom
+    func updateWith(avatarUrl: String, message: String) {
+        if let imageUrl = URL(string: avatarUrl) {
+            AF.request(imageUrl).responseImage { response in
+                switch response.result {
+                case .success(let image):
+                    self.avatarImageView.image = image
+                case .failure(_):
+                    self.avatarImageView.image = UIImage(named: "default_avatar")
+                }
+            }
+        }
+        self.messageTextView.text = message
+    }
     
     // MARK: Getter
     private lazy var avatarImageView: UIImageView = {
@@ -249,7 +266,6 @@ class FriendMessageCell : UITableViewCell {
     
     private lazy var messageTextView: UITextView = {
         let textView = UITextView()
-        textView.text = "这是一条测试消息哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈"
         textView.textColor = .black
         textView.clipsToBounds = true
         textView.layer.cornerRadius = 4
@@ -295,6 +311,19 @@ class SelfMessageCell : UITableViewCell {
     }
     
     // MARK: Custom
+    func updateWith(avatarUrl: String, message: String) {
+        if let imageUrl = URL(string: avatarUrl) {
+            AF.request(imageUrl).responseImage { response in
+                switch response.result {
+                case .success(let image):
+                    self.avatarImageView.image = image
+                case .failure(_):
+                    self.avatarImageView.image = UIImage(named: "default_avatar")
+                }
+            }
+        }
+        self.messageTextView.text = message
+    }
     
     // MARK: Getter
     private lazy var avatarImageView: UIImageView = {
@@ -313,7 +342,6 @@ class SelfMessageCell : UITableViewCell {
     
     private lazy var messageTextView: UITextView = {
         let textView = UITextView()
-        textView.text = "这是一条测试消息哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈"
         textView.textColor = .black
         textView.clipsToBounds = true
         textView.layer.cornerRadius = 4
