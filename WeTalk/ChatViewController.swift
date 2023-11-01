@@ -203,7 +203,7 @@ class InputBarView : UIView {
     }()
 }
 
-class FriendMessageCell : UITableViewCell {
+class BaseMessageCell : UITableViewCell {
     
     // MARK: Life Cycle
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -213,6 +213,65 @@ class FriendMessageCell : UITableViewCell {
         self.contentView.addSubview(self.avatarImageView)
         self.contentView.addSubview(self.cornerImageView)
         self.contentView.addSubview(self.messageTextView)
+        self.configureCell()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    // MARK: Custom
+    func configureCell() {}
+    
+    func updateWith(avatarUrl: String, message: String) {
+        if let imageUrl = URL(string: avatarUrl) {
+            AF.request(imageUrl).responseImage { response in
+                switch response.result {
+                case .success(let image):
+                    self.avatarImageView.image = image
+                case .failure(_):
+                    self.avatarImageView.image = UIImage(named: "default_avatar")
+                }
+            }
+        }
+        self.messageTextView.text = message
+    }
+    
+    // MARK: Getter
+    internal lazy var avatarImageView: UIImageView = {
+        let imageView = UIImageView(image: UIImage(named: "default_avatar"))
+        imageView.clipsToBounds = true
+        imageView.layer.cornerRadius = 4
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        return imageView
+    }()
+    
+    internal lazy var cornerImageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        return imageView
+    }()
+    
+    internal lazy var messageTextView: UITextView = {
+        let textView = UITextView()
+        textView.textColor = .black
+        textView.clipsToBounds = true
+        textView.layer.cornerRadius = 4
+        textView.isEditable = false
+        textView.isScrollEnabled = false
+        textView.font = UIFont(name: "PingFangSC-Regular", size: 17)
+        textView.contentInset = UIEdgeInsets(top: 8, left: 10, bottom: 8, right: 8)
+        textView.translatesAutoresizingMaskIntoConstraints = false
+        return textView
+    }()
+}
+
+class FriendMessageCell : BaseMessageCell {
+    
+    // MARK: Custom
+    override func configureCell() {
+        self.cornerImageView.image = UIImage(named: "chat_left_corner")
+        self.messageTextView.backgroundColor = .white
         NSLayoutConstraint.activate([
             self.avatarImageView.leftAnchor.constraint(equalTo: self.contentView.leftAnchor, constant: 16),
             self.avatarImageView.topAnchor.constraint(equalTo: self.contentView.topAnchor),
@@ -229,66 +288,14 @@ class FriendMessageCell : UITableViewCell {
             self.messageTextView.heightAnchor.constraint(greaterThanOrEqualToConstant: 40),
         ])
     }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    // MARK: Custom
-    func updateWith(avatarUrl: String, message: String) {
-        if let imageUrl = URL(string: avatarUrl) {
-            AF.request(imageUrl).responseImage { response in
-                switch response.result {
-                case .success(let image):
-                    self.avatarImageView.image = image
-                case .failure(_):
-                    self.avatarImageView.image = UIImage(named: "default_avatar")
-                }
-            }
-        }
-        self.messageTextView.text = message
-    }
-    
-    // MARK: Getter
-    private lazy var avatarImageView: UIImageView = {
-        let imageView = UIImageView(image: UIImage(named: "default_avatar"))
-        imageView.clipsToBounds = true
-        imageView.layer.cornerRadius = 4
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-        return imageView
-    }()
-    
-    private lazy var cornerImageView: UIImageView = {
-        let imageView = UIImageView(image: UIImage(named: "chat_left_corner"))
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-        return imageView
-    }()
-    
-    private lazy var messageTextView: UITextView = {
-        let textView = UITextView()
-        textView.textColor = .black
-        textView.clipsToBounds = true
-        textView.layer.cornerRadius = 4
-        textView.backgroundColor = .white
-        textView.isEditable = false
-        textView.isScrollEnabled = false
-        textView.font = UIFont(name: "PingFangSC-Regular", size: 17)
-        textView.contentInset = UIEdgeInsets(top: 8, left: 10, bottom: 8, right: 8)
-        textView.translatesAutoresizingMaskIntoConstraints = false
-        return textView
-    }()
 }
 
-class SelfMessageCell : UITableViewCell {
+class SelfMessageCell : BaseMessageCell {
     
-    // MARK: Life Cycle
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        super.init(style: style, reuseIdentifier: reuseIdentifier)
-        self.contentView.backgroundColor = UIColor(red: 233.0/255.0, green: 233.0/255.0, blue: 233.0/255.0, alpha: 1.0)
-        //        self.contentView.transform = CGAffineTransform(rotationAngle: CGFloat(-Double.pi))
-        self.contentView.addSubview(self.avatarImageView)
-        self.contentView.addSubview(self.cornerImageView)
-        self.contentView.addSubview(self.messageTextView)
+    // MARK: Custom
+    override func configureCell() {
+        self.cornerImageView.image = UIImage(named: "chat_right_corner")
+        self.messageTextView.backgroundColor = UIColor(red: 0.55, green: 0.91, blue: 0.5, alpha: 1)
         NSLayoutConstraint.activate([
             self.avatarImageView.rightAnchor.constraint(equalTo: self.contentView.rightAnchor, constant: -16),
             self.avatarImageView.topAnchor.constraint(equalTo: self.contentView.topAnchor),
@@ -305,52 +312,4 @@ class SelfMessageCell : UITableViewCell {
             self.messageTextView.heightAnchor.constraint(greaterThanOrEqualToConstant: 40),
         ])
     }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    // MARK: Custom
-    func updateWith(avatarUrl: String, message: String) {
-        if let imageUrl = URL(string: avatarUrl) {
-            AF.request(imageUrl).responseImage { response in
-                switch response.result {
-                case .success(let image):
-                    self.avatarImageView.image = image
-                case .failure(_):
-                    self.avatarImageView.image = UIImage(named: "default_avatar")
-                }
-            }
-        }
-        self.messageTextView.text = message
-    }
-    
-    // MARK: Getter
-    private lazy var avatarImageView: UIImageView = {
-        let imageView = UIImageView(image: UIImage(named: "default_avatar"))
-        imageView.clipsToBounds = true
-        imageView.layer.cornerRadius = 4
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-        return imageView
-    }()
-    
-    private lazy var cornerImageView: UIImageView = {
-        let imageView = UIImageView(image: UIImage(named: "chat_right_corner"))
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-        return imageView
-    }()
-    
-    private lazy var messageTextView: UITextView = {
-        let textView = UITextView()
-        textView.textColor = .black
-        textView.clipsToBounds = true
-        textView.layer.cornerRadius = 4
-        textView.backgroundColor = UIColor(red: 0.55, green: 0.91, blue: 0.5, alpha: 1)
-        textView.isEditable = false
-        textView.isScrollEnabled = false
-        textView.font = UIFont(name: "PingFangSC-Regular", size: 17)
-        textView.contentInset = UIEdgeInsets(top: 8, left: 10, bottom: 8, right: 8)
-        textView.translatesAutoresizingMaskIntoConstraints = false
-        return textView
-    }()
 }
