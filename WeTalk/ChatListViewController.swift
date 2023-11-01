@@ -144,8 +144,10 @@ class ChatCell: UITableViewCell {
         self.titleLabel.text = model.friendInfo.displayName()
         if model.friendInfo.messages.count > 0 {
             self.summaryLabel.text = model.friendInfo.messages[model.friendInfo.messages.count-1].text
+            self.timeLabel.text = self.getLastChatTimeText(lastChatTime: model.friendInfo.messages[model.friendInfo.messages.count-1].chatTime)
         } else {
             self.summaryLabel.text = ""
+            self.timeLabel.text = ""
         }
         if model.unreadCount == 0 {
             self.redDotLabel.isHidden = true
@@ -157,7 +159,6 @@ class ChatCell: UITableViewCell {
             self.redDotLabel.isHidden = false
             self.redDotLabel.text = "99+"
         }
-        self.timeLabel.text = self.getLastChatTimeText(lastChatTime: model.lastChatTime)
         if let imageUrl = URL(string: model.friendInfo.avatarUrl ?? "error_avartar_url") {
             AF.request(imageUrl).responseImage { response in
                 switch response.result {
@@ -259,7 +260,6 @@ struct ChatListResponse : Decodable {
 
 struct ChatCellModel : Decodable {
     let friendInfo: FriendInfo
-    let lastChatTime: String
     let unreadCount: Int
 }
 
