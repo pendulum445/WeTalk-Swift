@@ -260,7 +260,7 @@ class BaseMessageCell : UITableViewCell {
         textView.isEditable = false
         textView.isScrollEnabled = false
         textView.font = UIFont(name: "PingFangSC-Regular", size: 17)
-        textView.contentInset = UIEdgeInsets(top: 8, left: 10, bottom: 8, right: 8)
+        textView.textContainerInset = UIEdgeInsets(top: 8, left: 10, bottom: 8, right: 10)
         textView.translatesAutoresizingMaskIntoConstraints = false
         return textView
     }()
