@@ -5,14 +5,28 @@
 //  Created by liaoyunjie on 2023/10/9.
 //
 
-import Alamofire
-import AlamofireImage
+import SDWebImage
 import UIKit
+
+func firstLetterOf(string: String) -> String {
+    let mutableString = NSMutableString(string: string) as CFMutableString
+    CFStringTransform(mutableString, nil, kCFStringTransformMandarinLatin, false)
+    CFStringTransform(mutableString, nil, kCFStringTransformStripDiacritics, false)
+    let convertedString = mutableString as String
+    let firstCharacter = convertedString.prefix(1)
+    let regex = try! NSRegularExpression(pattern: "[a-zA-Z]", options: [])
+    let isAlphabetic = regex.firstMatch(in: String(firstCharacter), options: [], range: NSRange(location: 0, length: firstCharacter.utf16.count)) != nil
+    if !isAlphabetic {
+        return "#"
+    }
+    return String(firstCharacter).uppercased()
+}
 
 class ContactsViewController : UIViewController, UITableViewDataSource, UITableViewDelegate, NavigationBarViewDelegate {
     
-    private var groupedFriendInfo: [String: [FriendInfo]] = [:]
+    private var contactsModel: [String: [FriendInfo]] = [:]
     private var sectionLetters: [String] = []
+    private var fetchDataFailed = false
     
     // MARK: Life Cycle
     override func viewDidLoad() {
@@ -20,11 +34,7 @@ class ContactsViewController : UIViewController, UITableViewDataSource, UITableV
         self.view.backgroundColor = UIColor(red: 233.0/255.0, green: 233.0/255.0, blue: 233.0/255.0, alpha: 1.0)
         self.view.addSubview(self.navigationBarView)
         self.view.addSubview(self.tableView)
-        self.requestData()
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
+        self.view.addSubview(self.activityIndicator)
         var statusBarHeight: CGFloat = 0
         if let statusBarManager = UIApplication.shared.windows.first?.windowScene?.statusBarManager {
             statusBarHeight = statusBarManager.statusBarFrame.height
@@ -37,85 +47,67 @@ class ContactsViewController : UIViewController, UITableViewDataSource, UITableV
             self.tableView.leftAnchor.constraint(equalTo: self.view.leftAnchor),
             self.tableView.rightAnchor.constraint(equalTo: self.view.rightAnchor),
             self.tableView.topAnchor.constraint(equalTo: self.navigationBarView.bottomAnchor),
-            self.tableView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor)
+            self.tableView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
+            self.activityIndicator.leftAnchor.constraint(equalTo: self.view.leftAnchor),
+            self.activityIndicator.rightAnchor.constraint(equalTo: self.view.rightAnchor),
+            self.activityIndicator.topAnchor.constraint(equalTo: self.navigationBarView.bottomAnchor),
+            self.activityIndicator.bottomAnchor.constraint(equalTo: self.view.bottomAnchor)
         ])
+        self.activityIndicator.startAnimating()
+        Task {
+            do {
+                let friendInfos: [FriendInfo] = try await fetchData(from: "https://mock.apifox.cn/m1/2415634-0-default/contacts?userId={% mock 'qq' %}")
+                DispatchQueue.main.async {
+                    self.groupByFirstLetter(friendInfos: friendInfos)
+                    self.tableView.reloadData()
+                    self.activityIndicator.stopAnimating()
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    self.fetchDataFailed = true
+                }
+            }
+        }
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
     }
     
     // MARK: Custom
-    private func requestData() {
-        AF.request("https://mock.apifox.cn/m1/2415634-0-default/friendList?userId=<userId>").responseDecodable(of: FriendListResponse.self) { response in
-            switch response.result {
-            case .success(let friendListResponse):
-                self.groupDataByFirstLetter(data: friendListResponse.data)
-                self.tableView.reloadData()
-            case .failure(let error):
-                print(error)
-                // TODO: 显示加载失败页面
-            }
-        }
-    }
-    
-    private func groupDataByFirstLetter(data: [FriendInfo]) {
-        for it in data {
-            var firstLetter = self.firstLetterOf(string: it.displayName())
-            if !("A"..."Z").contains(firstLetter) {
+    private func groupByFirstLetter(friendInfos: [FriendInfo]) {
+        for it in friendInfos {
+            var firstLetter = firstLetterOf(string: it.displayName())
+            if !("A" ... "Z").contains(firstLetter) {
                 firstLetter = "#"
             }
-            if self.groupedFriendInfo[firstLetter] == nil {
-                self.groupedFriendInfo[firstLetter] = []
+            if self.contactsModel[firstLetter] == nil {
+                self.contactsModel[firstLetter] = []
             }
-            self.groupedFriendInfo[firstLetter]?.append(it)
+            self.contactsModel[firstLetter]?.append(it)
         }
-        for it in self.groupedFriendInfo.keys {
+        for it in self.contactsModel.keys {
             self.sectionLetters.append(it)
         }
         self.sectionLetters.sort()
     }
     
-    private func firstLetterOf(string: String) -> String {
-        let mutableString = NSMutableString(string: string) as CFMutableString
-        CFStringTransform(mutableString, nil, kCFStringTransformMandarinLatin, false)
-        CFStringTransform(mutableString, nil, kCFStringTransformStripDiacritics, false)
-        let convertedString = mutableString as String
-        let firstCharacter = convertedString.prefix(1)
-        let regex = try! NSRegularExpression(pattern: "[a-zA-Z]", options: [])
-        let isAlphabetic = regex.firstMatch(in: String(firstCharacter), options: [], range: NSRange(location: 0, length: firstCharacter.utf16.count)) != nil
-        if !isAlphabetic {
-            return "#"
-        }
-        return String(firstCharacter).uppercased()
-    }
-    
-    private func friendInfoAt(indexPath: IndexPath) -> FriendInfo {
-        return self.groupedFriendInfo[self.sectionLetters[indexPath.section - 1]]![indexPath.row]
-    }
-    
     // MARK: UITableViewDataSource
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if section == 0 {
-            return 2
-        } else {
-            return self.groupedFriendInfo[self.sectionLetters[section - 1]]?.count ?? 0
-        }
+        return self.contactsModel[self.sectionLetters[section]]?.count ?? 0
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: String(describing: ContactCell.self), for: indexPath) as! ContactCell
-        if indexPath.section == 0 {
-            if indexPath.row == 0 {
-                cell.updateWith(localImage: "group_chat", title: "群聊")
-            } else if indexPath.row == 1 {
-                cell.updateWith(localImage: "tag", title: "标签")
-            }
-        } else {
-            let friendInfo = self.friendInfoAt(indexPath: indexPath)
-            cell.updateWith(imageUrl: friendInfo.avatarUrl, title: friendInfo.displayName())
-        }
+        let key = self.sectionLetters[indexPath.section]
+        let friendInfo = self.contactsModel[key]![indexPath.row]
+        cell.update(avatarUrl: friendInfo.avatarUrl, title: friendInfo.displayName())
         return cell
     }
     
     func numberOfSections(in tableView: UITableView) -> Int {
-        return 1 + self.groupedFriendInfo.keys.count
+        return self.contactsModel.keys.count
     }
     
     // MARK: UITableViewDelegate
@@ -128,11 +120,11 @@ class ContactsViewController : UIViewController, UITableViewDataSource, UITableV
     }
     
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        return section > 0 ? ContactHeaderView(title: self.sectionLetters[section - 1]) : nil
+        return ContactHeaderView(title: self.sectionLetters[section])
     }
     
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        return section > 0 ? 22 : 0
+        return 24
     }
     
     // MARK: NavigationBarViewDelegate
@@ -165,6 +157,13 @@ class ContactsViewController : UIViewController, UITableViewDataSource, UITableV
         tableView.translatesAutoresizingMaskIntoConstraints = false
         return tableView
     }()
+    
+    private let activityIndicator: UIActivityIndicatorView = {
+        let activityIndicator = UIActivityIndicatorView(style: .large)
+        activityIndicator.translatesAutoresizingMaskIntoConstraints = false
+        activityIndicator.hidesWhenStopped = true
+        return activityIndicator
+    }()
 }
 
 class ContactCell : UITableViewCell {
@@ -196,23 +195,9 @@ class ContactCell : UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
-    // MARK: Custom
-    func updateWith(localImage: String, title: String) {
-        self.updateWith(image: UIImage(named: localImage)!, title: title)
-    }
-    
-    func updateWith(imageUrl: String?, title: String) {
+    func update(avatarUrl: String?, title: String) {
+        self.avatarImageView.sd_setImage(with: URL(string: avatarUrl ?? "error_url"), placeholderImage: UIImage(named: "default_avatar"))
         self.titleLabel.text = title
-        if let imageUrl = URL(string: imageUrl ?? "error_avartar_url") {
-            AF.request(imageUrl).responseImage { response in
-                switch response.result {
-                case .success(let image):
-                    self.updateWith(image: image, title: title)
-                case .failure(_):
-                    self.updateWith(localImage: "default_avatar", title: title)
-                }
-            }
-        }
     }
     
     private func updateWith(image: UIImage, title: String) {

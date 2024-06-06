@@ -14,11 +14,16 @@ class MainTabBarController: UITabBarController {
         super.viewDidLoad()
         self.tabBar.tintColor = UIColor(red: 0.027, green: 0.757, blue: 0.376, alpha: 1)
         self.tabBar.backgroundColor = UIColor(red: 233.0/255.0, green: 233.0/255.0, blue: 233.0/255.0, alpha: 1.0)
-        self.viewControllers = [self.messageListViewController, self.contactsViewController, self.discoverViewController, self.profileViewController]
+        self.viewControllers = [
+            self.chatListViewController,
+            self.contactsViewController,
+            self.discoverViewController, 
+            self.profileViewController,
+        ]
     }
     
     // MARK: Getter
-    private lazy var messageListViewController: ChatListViewController = {
+    private lazy var chatListViewController: ChatListViewController = {
         let vc = ChatListViewController()
         vc.tabBarItem = UITabBarItem(title: "消息", image: UIImage(systemName: "message"), selectedImage: UIImage(systemName: "message.fill"))
         return vc

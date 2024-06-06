@@ -5,9 +5,7 @@
 //  Created by liaoyunjie on 2023/10/8.
 //
 
-import Alamofire
-import AlamofireImage
-import Dispatch
+import SDWebImage
 import UIKit
 
 class ChatViewController : UIViewController, UITableViewDataSource, UITableViewDelegate, NavigationBarViewDelegate {
@@ -72,11 +70,11 @@ class ChatViewController : UIViewController, UITableViewDataSource, UITableViewD
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         if self.friendInfo!.messages[indexPath.row].type == 0 {
             let cell = tableView.dequeueReusableCell(withIdentifier: "FriendMessageCell", for: indexPath) as! FriendMessageCell
-            cell.updateWith(avatarUrl: self.friendInfo!.avatarUrl ?? "error_avatar_url", message: self.friendInfo!.messages[indexPath.row].text)
+            cell.update(avatarUrl: self.friendInfo!.avatarUrl, message: self.friendInfo!.messages[indexPath.row].text)
             return cell
         } else {
             let cell = tableView.dequeueReusableCell(withIdentifier: "SelfMessageCell", for: indexPath) as! SelfMessageCell
-            cell.updateWith(avatarUrl: self.friendInfo!.avatarUrl ?? "error_avatar_url", message: self.friendInfo!.messages[indexPath.row].text)
+            cell.update(avatarUrl: self.friendInfo!.avatarUrl, message: self.friendInfo!.messages[indexPath.row].text)
             return cell
         }
     }
@@ -223,17 +221,8 @@ class BaseMessageCell : UITableViewCell {
     // MARK: Custom
     func configureCell() {}
     
-    func updateWith(avatarUrl: String, message: String) {
-        if let imageUrl = URL(string: avatarUrl) {
-            AF.request(imageUrl).responseImage { response in
-                switch response.result {
-                case .success(let image):
-                    self.avatarImageView.image = image
-                case .failure(_):
-                    self.avatarImageView.image = UIImage(named: "default_avatar")
-                }
-            }
-        }
+    func update(avatarUrl: String?, message: String) {
+        self.avatarImageView.sd_setImage(with: URL(string: avatarUrl ?? "error_url"), placeholderImage: UIImage(named: "default_avatar"))
         self.messageTextView.text = message
     }
     

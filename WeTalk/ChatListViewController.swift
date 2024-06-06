@@ -5,13 +5,13 @@
 //  Created by liaoyunjie on 2023/9/29.
 //
 
-import Alamofire
-import AlamofireImage
+import SDWebImage
 import UIKit
 
 class ChatListViewController : UIViewController, UITableViewDataSource, UITableViewDelegate, NavigationBarViewDelegate {
     
-    private var chatCellModels: [ChatCellModel]?
+    private var chatListModel: [ChatCellModel] = []
+    private var fetchDataFailed = false
     
     // MARK: Life Cycle
     override func viewDidLoad() {
@@ -19,6 +19,7 @@ class ChatListViewController : UIViewController, UITableViewDataSource, UITableV
         self.view.backgroundColor = UIColor(red: 233.0/255.0, green: 233.0/255.0, blue: 233.0/255.0, alpha: 1.0)
         self.view.addSubview(self.navigationBarView)
         self.view.addSubview(self.tableView)
+        self.view.addSubview(self.activityIndicator)
         var statusBarHeight: CGFloat = 0
         if let statusBarManager = UIApplication.shared.windows.first?.windowScene?.statusBarManager {
             statusBarHeight = statusBarManager.statusBarFrame.height
@@ -31,29 +32,39 @@ class ChatListViewController : UIViewController, UITableViewDataSource, UITableV
             self.tableView.leftAnchor.constraint(equalTo: self.view.leftAnchor),
             self.tableView.rightAnchor.constraint(equalTo: self.view.rightAnchor),
             self.tableView.topAnchor.constraint(equalTo: self.navigationBarView.bottomAnchor),
-            self.tableView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor)
+            self.tableView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
+            self.activityIndicator.leftAnchor.constraint(equalTo: self.view.leftAnchor),
+            self.activityIndicator.rightAnchor.constraint(equalTo: self.view.rightAnchor),
+            self.activityIndicator.topAnchor.constraint(equalTo: self.navigationBarView.bottomAnchor),
+            self.activityIndicator.bottomAnchor.constraint(equalTo: self.view.bottomAnchor)
         ])
-        self.requestData()
-    }
-    
-    // MARK: Custom
-    private func requestData() {
-        AF.request("https://mock.apifox.cn/m1/2415634-0-default/chatList?userId={% mock 'qq' %}").responseDecodable(of: ChatListResponse.self) { response in
-            if case .success(let chatListResponse) = response.result {
-                self.chatCellModels = chatListResponse.data
-                self.tableView.reloadData()
+        self.activityIndicator.startAnimating()
+        Task {
+            do {
+                let chatListModel: [ChatCellModel] = try await fetchData(from: "https://mock.apifox.cn/m1/2415634-0-default/chatList?userId={% mock 'qq' %}")
+                DispatchQueue.main.async {
+                    self.chatListModel = chatListModel
+                    self.tableView.reloadData()
+                    self.activityIndicator.stopAnimating()
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    self.fetchDataFailed = true
+                }
             }
         }
     }
     
+    // MARK: Custom
+    
     // MARK: UITableViewDataSource
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return self.chatCellModels?.count ?? 0
+        return self.chatListModel.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: String(describing: ChatCell.self), for: indexPath) as! ChatCell
-        cell.updateWithModel(model: self.chatCellModels![indexPath.row])
+        cell.update(with: self.chatListModel[indexPath.row])
         return cell
     }
     
@@ -64,12 +75,12 @@ class ChatListViewController : UIViewController, UITableViewDataSource, UITableV
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        if self.chatCellModels![indexPath.row].unreadCount > 0 {
-            self.chatCellModels![indexPath.row].unreadCount = 0
+        if self.chatListModel[indexPath.row].unreadCount > 0 {
+            self.chatListModel[indexPath.row].unreadCount = 0
             let cell = tableView.cellForRow(at: indexPath) as! ChatCell
-            cell.updateUnreadRedDotWith(unreadCount: 0)
+            cell.updateUnreadRedDot(with: 0)
         }
-        self.navigationController?.pushViewController(ChatViewController(friendInfo: self.chatCellModels![indexPath.row].friendInfo), animated: true)
+        self.navigationController?.pushViewController(ChatViewController(friendInfo: self.chatListModel[indexPath.row].friendInfo), animated: true)
     }
     
     // MARK: NavigationBarViewDelegate
@@ -99,6 +110,62 @@ class ChatListViewController : UIViewController, UITableViewDataSource, UITableV
         tableView.translatesAutoresizingMaskIntoConstraints = false
         return tableView
     }()
+    
+    private let activityIndicator: UIActivityIndicatorView = {
+        let activityIndicator = UIActivityIndicatorView(style: .large)
+        activityIndicator.translatesAutoresizingMaskIntoConstraints = false
+        activityIndicator.hidesWhenStopped = true
+        return activityIndicator
+    }()
+}
+
+enum DateDisplayFormat {
+    case timeOnly, today, yesterday, thisWeek, monthDay, yearMonthDay
+}
+
+func getFriendlyDateText(from inputDateString: String) -> String {
+    let dateFormatter = DateFormatter()
+    dateFormatter.dateFormat = "yy-MM-dd HH:mm:ss"
+    
+    guard let date = dateFormatter.date(from: inputDateString) else {
+        return "Invalid Date"
+    }
+    
+    let calendar = Calendar.current
+    let now = Date()
+    let components = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: date)
+    let sameYearAndWeek = calendar.isDateInToday(date) || (components.yearForWeekOfYear == calendar.component(.yearForWeekOfYear, from: now) && components.weekOfYear == calendar.component(.weekOfYear, from: now))
+    
+    var format: DateDisplayFormat
+    
+    if calendar.isDateInToday(date) {
+        format = .timeOnly
+    } else if calendar.isDateInYesterday(date) {
+        format = .yesterday
+    } else if sameYearAndWeek {
+        format = .thisWeek
+    } else if calendar.component(.year, from: date) == calendar.component(.year, from: now) {
+        format = .monthDay
+    } else {
+        format = .yearMonthDay
+    }
+    
+    switch format {
+    case .timeOnly:
+        dateFormatter.dateFormat = "HH:mm"
+    case .today:
+        return "今天"
+    case .yesterday:
+        return "昨天"
+    case .thisWeek:
+        dateFormatter.dateFormat = "E"
+    case .monthDay:
+        dateFormatter.dateFormat = "MM月dd日"
+    case .yearMonthDay:
+        dateFormatter.dateFormat = "y年MM月dd日"
+    }
+    
+    return dateFormatter.string(from: date)
 }
 
 class ChatCell: UITableViewCell {
@@ -130,6 +197,7 @@ class ChatCell: UITableViewCell {
             self.summaryLabel.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 38),
             self.summaryLabel.rightAnchor.constraint(lessThanOrEqualTo: self.timeLabel.leftAnchor, constant: -16),
             self.summaryLabel.heightAnchor.constraint(equalToConstant: 20),
+            self.timeLabel.widthAnchor.constraint(lessThanOrEqualToConstant: 150),
             self.timeLabel.rightAnchor.constraint(equalTo: self.contentView.rightAnchor, constant: -16),
             self.timeLabel.topAnchor.constraint(equalTo: self.contentView.topAnchor, constant: 19),
             self.bottomLineView.leftAnchor.constraint(equalTo: self.contentView.leftAnchor, constant: 76),
@@ -144,67 +212,23 @@ class ChatCell: UITableViewCell {
     }
     
     // MARK: Custom
-    func updateWithModel(model: ChatCellModel) {
+    func update(with model: ChatCellModel) {
         self.titleLabel.text = model.friendInfo.displayName()
         if model.friendInfo.messages.count > 0 {
             self.summaryLabel.text = model.friendInfo.messages[model.friendInfo.messages.count-1].text
-            self.timeLabel.text = self.getLastChatTimeText(lastChatTime: model.friendInfo.messages[model.friendInfo.messages.count-1].chatTime)
+            self.timeLabel.text = getFriendlyDateText(from: model.friendInfo.messages[model.friendInfo.messages.count-1].chatTime)
         } else {
             self.summaryLabel.text = ""
             self.timeLabel.text = ""
         }
-        self.updateUnreadRedDotWith(unreadCount: model.unreadCount)
-        if let imageUrl = URL(string: model.friendInfo.avatarUrl ?? "error_avartar_url") {
-            AF.request(imageUrl).responseImage { response in
-                switch response.result {
-                case .success(let image):
-                    self.avatarImageView.image = image
-                case .failure(_):
-                    self.avatarImageView.image = UIImage(named: "default_avatar")
-                }
-            }
-        }
+        self.updateUnreadRedDot(with: model.unreadCount)
+        self.avatarImageView.sd_setImage(with: URL(string: model.friendInfo.avatarUrl ?? "error_avartar_url"), placeholderImage: UIImage(named: "default_avatar"))
         self.contentView.setNeedsLayout()
     }
     
-    func updateUnreadRedDotWith(unreadCount: Int) {
-        if unreadCount == 0 {
-            self.redDotLabel.isHidden = true
-            self.redDotLabel.text = "0"
-        } else if unreadCount < 100 {
-            self.redDotLabel.isHidden = false
-            self.redDotLabel.text = String("\(unreadCount)")
-        } else {
-            self.redDotLabel.isHidden = false
-            self.redDotLabel.text = "99+"
-        }
-    }
-    
-    private func getLastChatTimeText(lastChatTime: String) -> String {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yy-MM-dd HH:mm:ss"
-        if let date = dateFormatter.date(from: lastChatTime) {
-            let calendar = Calendar.current
-            let now = Date()
-            if calendar.isDateInToday(date) {
-                dateFormatter.dateFormat = "HH:mm"
-                return dateFormatter.string(from: date)
-            } else if calendar.isDateInYesterday(date) {
-                return "昨天"
-            } else if calendar.isDate(date, equalTo: now, toGranularity: .weekOfYear) {
-                dateFormatter.dateFormat = "E"
-                return dateFormatter.string(from: date)
-            } else {
-                if calendar.isDate(date, equalTo: now, toGranularity: .year) {
-                    dateFormatter.dateFormat = "MM月dd日"
-                } else {
-                    dateFormatter.dateFormat = "y年MM月dd日"
-                }
-                return dateFormatter.string(from: date)
-            }
-        } else {
-            return "Invalid Date"
-        }
+    func updateUnreadRedDot(with unreadCount: Int) {
+        self.redDotLabel.text = unreadCount > 99 ? "99+" : String("\(unreadCount)")
+        self.redDotLabel.isHidden = unreadCount == 0;
     }
     
     // MARK: Getter
@@ -259,32 +283,4 @@ class ChatCell: UITableViewCell {
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
-}
-
-struct ChatListResponse : Decodable {
-    let code: Int
-    let data: [ChatCellModel]
-}
-
-struct ChatCellModel : Decodable {
-    let friendInfo: FriendInfo
-    var unreadCount: Int
-}
-
-class FriendInfo : Decodable {
-    let avatarUrl: String?
-    let nickName: String
-    let noteName: String?
-    let userId: String
-    let messages: [ChatMessage]
-    
-    func displayName() -> String {
-        return self.noteName ?? self.nickName;
-    }
-}
-
-struct ChatMessage : Decodable {
-    let chatTime: String
-    let text: String
-    let type: Int
 }
