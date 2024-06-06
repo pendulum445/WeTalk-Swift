@@ -8,17 +8,19 @@
 import SDWebImage
 import UIKit
 
-class ChatViewController : UIViewController, UITableViewDataSource, UITableViewDelegate, NavigationBarViewDelegate {
-    
+class ChatViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, NavigationBarViewDelegate {
     private var friendInfo: FriendInfo?
     private var hasScrolledToBottom: Bool = false
+    private var inputBarBottomConstraint: NSLayoutConstraint!
     
     // MARK: Life Cycle
+
     init(friendInfo: FriendInfo) {
         super.init(nibName: nil, bundle: nil)
         self.friendInfo = friendInfo
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -33,20 +35,23 @@ class ChatViewController : UIViewController, UITableViewDataSource, UITableViewD
         if let statusBarManager = UIApplication.shared.windows.first?.windowScene?.statusBarManager {
             statusBarHeight = statusBarManager.statusBarFrame.height
         }
+        self.inputBarBottomConstraint = self.inputBarView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor)
         NSLayoutConstraint.activate([
             self.navigationBarView.centerXAnchor.constraint(equalTo: self.view.centerXAnchor),
             self.navigationBarView.topAnchor.constraint(equalTo: self.view.topAnchor, constant: statusBarHeight),
             self.navigationBarView.widthAnchor.constraint(equalTo: self.view.widthAnchor),
             self.navigationBarView.heightAnchor.constraint(equalToConstant: 44),
             self.inputBarView.centerXAnchor.constraint(equalTo: self.view.centerXAnchor),
-            self.inputBarView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
+            self.inputBarBottomConstraint,
             self.inputBarView.widthAnchor.constraint(equalTo: self.view.widthAnchor),
-            self.inputBarView.heightAnchor.constraint(equalToConstant: 56+34),
+            self.inputBarView.heightAnchor.constraint(equalToConstant: 56 + 34),
             self.tableView.centerXAnchor.constraint(equalTo: self.view.centerXAnchor),
             self.tableView.topAnchor.constraint(equalTo: self.navigationBarView.bottomAnchor),
             self.tableView.bottomAnchor.constraint(equalTo: self.inputBarView.topAnchor),
-            self.tableView.widthAnchor.constraint(equalTo: self.view.widthAnchor)
+            self.tableView.widthAnchor.constraint(equalTo: self.view.widthAnchor),
         ])
+        NotificationCenter.default.addObserver(self, selector: #selector(self.keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(self.keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -54,7 +59,33 @@ class ChatViewController : UIViewController, UITableViewDataSource, UITableViewD
         self.hasScrolledToBottom = true
     }
     
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+    
+    @objc private func keyboardWillShow(notification: NSNotification) {
+        if let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue {
+            let keyboardHeight = keyboardFrame.cgRectValue.height
+            self.inputBarBottomConstraint.constant = -keyboardHeight+32
+            UIView.animate(withDuration: 0.3) {
+                self.view.layoutIfNeeded()
+                self.tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: keyboardHeight, right: 0)
+                self.tableView.scrollIndicatorInsets = self.tableView.contentInset
+            }
+        }
+    }
+        
+    @objc private func keyboardWillHide(notification: NSNotification) {
+        self.inputBarBottomConstraint.constant = 0
+        UIView.animate(withDuration: 0.3) {
+            self.view.layoutIfNeeded()
+            self.tableView.contentInset = .zero
+            self.tableView.scrollIndicatorInsets = .zero
+        }
+    }
+    
     // MARK: UITableViewDataSource
+
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if !self.hasScrolledToBottom {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.005) {
@@ -80,11 +111,13 @@ class ChatViewController : UIViewController, UITableViewDataSource, UITableViewD
     }
     
     // MARK: UITableViewDelegate
+
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
     }
     
     // MARK: NavigationBarViewDelegate
+
     func didClickNavigationBarLeftButton() {
         self.navigationController?.popViewController(animated: true)
     }
@@ -94,6 +127,7 @@ class ChatViewController : UIViewController, UITableViewDataSource, UITableViewD
     }
     
     // MARK: Getter
+
     private lazy var navigationBarView: FriendNavigationBar = {
         let view = FriendNavigationBar(title: friendInfo!.displayName())
         view.delegate = self
@@ -115,7 +149,6 @@ class ChatViewController : UIViewController, UITableViewDataSource, UITableViewD
         tableView.showsVerticalScrollIndicator = false
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 56
-        //        tableView.transform = CGAffineTransform(rotationAngle: CGFloat(Double.pi))
         tableView.backgroundColor = UIColor(red: 233.0/255.0, green: 233.0/255.0, blue: 233.0/255.0, alpha: 1.0)
         tableView.register(FriendMessageCell.self, forCellReuseIdentifier: "FriendMessageCell")
         tableView.register(SelfMessageCell.self, forCellReuseIdentifier: "SelfMessageCell")
@@ -124,9 +157,9 @@ class ChatViewController : UIViewController, UITableViewDataSource, UITableViewD
     }()
 }
 
-class InputBarView : UIView {
-    
+class InputBarView: UIView {
     // MARK: Life Cycle
+
     init() {
         super.init(frame: CGRectZero)
         self.backgroundColor = UIColor(red: 0.97, green: 0.97, blue: 0.97, alpha: 0.9)
@@ -146,7 +179,7 @@ class InputBarView : UIView {
             self.voiceButton.heightAnchor.constraint(equalToConstant: 32),
             self.textField.leftAnchor.constraint(equalTo: self.voiceButton.rightAnchor, constant: 8),
             self.textField.centerYAnchor.constraint(equalTo: self.voiceButton.centerYAnchor),
-            self.textField.widthAnchor.constraint(equalTo: self.widthAnchor, constant: -48-88),
+            self.textField.widthAnchor.constraint(equalTo: self.widthAnchor, constant: -48 - 88),
             self.textField.heightAnchor.constraint(equalToConstant: 40),
             self.emotionButton.leftAnchor.constraint(equalTo: self.textField.rightAnchor, constant: 8),
             self.emotionButton.centerYAnchor.constraint(equalTo: self.voiceButton.centerYAnchor),
@@ -155,15 +188,17 @@ class InputBarView : UIView {
             self.moreButton.rightAnchor.constraint(equalTo: self.rightAnchor, constant: -8),
             self.moreButton.centerYAnchor.constraint(equalTo: self.voiceButton.centerYAnchor),
             self.moreButton.widthAnchor.constraint(equalToConstant: 32),
-            self.moreButton.heightAnchor.constraint(equalToConstant: 32)
+            self.moreButton.heightAnchor.constraint(equalToConstant: 32),
         ])
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
     // MARK: Getter
+
     private lazy var topLineView: UIView = {
         let view = UIView()
         view.backgroundColor = .black.withAlphaComponent(0.1)
@@ -201,9 +236,9 @@ class InputBarView : UIView {
     }()
 }
 
-class BaseMessageCell : UITableViewCell {
-    
+class BaseMessageCell: UITableViewCell {
     // MARK: Life Cycle
+
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         self.contentView.backgroundColor = UIColor(red: 233.0/255.0, green: 233.0/255.0, blue: 233.0/255.0, alpha: 1.0)
@@ -214,11 +249,13 @@ class BaseMessageCell : UITableViewCell {
         self.configureCell()
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
     // MARK: Custom
+
     func configureCell() {}
     
     func update(avatarUrl: String?, message: String) {
@@ -227,7 +264,8 @@ class BaseMessageCell : UITableViewCell {
     }
     
     // MARK: Getter
-    internal lazy var avatarImageView: UIImageView = {
+
+    lazy var avatarImageView: UIImageView = {
         let imageView = UIImageView(image: UIImage(named: "default_avatar"))
         imageView.clipsToBounds = true
         imageView.layer.cornerRadius = 4
@@ -235,13 +273,13 @@ class BaseMessageCell : UITableViewCell {
         return imageView
     }()
     
-    internal lazy var cornerImageView: UIImageView = {
+    lazy var cornerImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
     }()
     
-    internal lazy var messageTextView: UITextView = {
+    lazy var messageTextView: UITextView = {
         let textView = UITextView()
         textView.textColor = .black
         textView.clipsToBounds = true
@@ -255,9 +293,9 @@ class BaseMessageCell : UITableViewCell {
     }()
 }
 
-class FriendMessageCell : BaseMessageCell {
-    
+class FriendMessageCell: BaseMessageCell {
     // MARK: Custom
+
     override func configureCell() {
         self.cornerImageView.image = UIImage(named: "chat_left_corner")
         self.messageTextView.backgroundColor = .white
@@ -279,9 +317,9 @@ class FriendMessageCell : BaseMessageCell {
     }
 }
 
-class SelfMessageCell : BaseMessageCell {
-    
+class SelfMessageCell: BaseMessageCell {
     // MARK: Custom
+
     override func configureCell() {
         self.cornerImageView.image = UIImage(named: "chat_right_corner")
         self.messageTextView.backgroundColor = UIColor(red: 0.55, green: 0.91, blue: 0.5, alpha: 1)
