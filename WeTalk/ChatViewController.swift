@@ -8,8 +8,17 @@
 import SDWebImage
 import UIKit
 
-class ChatViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, NavigationBarViewDelegate {
-    private var friendInfo: FriendInfo?
+enum MessageType: Int {
+    case SelfMessage = 0
+    case FriendMessage = 1
+}
+
+@objc protocol MessageCellDelegate : AnyObject {
+    @objc func didClickAvatar(type: Int)
+}
+
+class ChatViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, NavigationBarViewDelegate, MessageCellDelegate {
+    private var friendInfo: FriendInfo!
     private var hasScrolledToBottom: Bool = false
     private var inputBarBottomConstraint: NSLayoutConstraint!
     
@@ -64,6 +73,7 @@ class ChatViewController: UIViewController, UITableViewDataSource, UITableViewDe
     }
     
     // MARK: Custom
+
     private func scrollToBottom() {
         guard let friendInfo = friendInfo, friendInfo.messages.count > 0 else { return }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.005) {
@@ -78,7 +88,7 @@ class ChatViewController: UIViewController, UITableViewDataSource, UITableViewDe
         if let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue {
             let keyboardHeight = keyboardFrame.cgRectValue.height
             self.scrollToBottom()
-            self.inputBarBottomConstraint.constant = -keyboardHeight+32
+            self.inputBarBottomConstraint.constant = -keyboardHeight + 32
             UIView.animate(withDuration: 0.3) {
                 self.view.layoutIfNeeded()
             }
@@ -102,13 +112,15 @@ class ChatViewController: UIViewController, UITableViewDataSource, UITableViewDe
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        if self.friendInfo!.messages[indexPath.row].type == 0 {
+        if self.friendInfo.messages[indexPath.row].type == MessageType.SelfMessage.rawValue {
             let cell = tableView.dequeueReusableCell(withIdentifier: "FriendMessageCell", for: indexPath) as! FriendMessageCell
-            cell.update(avatarUrl: self.friendInfo!.avatarUrl, message: self.friendInfo!.messages[indexPath.row].text)
+            cell.delegate = self
+            cell.update(avatarUrl: self.friendInfo.userInfo.avatarUrl, message: self.friendInfo.messages[indexPath.row].text)
             return cell
         } else {
             let cell = tableView.dequeueReusableCell(withIdentifier: "SelfMessageCell", for: indexPath) as! SelfMessageCell
-            cell.update(avatarUrl: self.friendInfo!.avatarUrl, message: self.friendInfo!.messages[indexPath.row].text)
+            cell.delegate = self
+            cell.update(avatarUrl: self.friendInfo.userInfo.avatarUrl, message: self.friendInfo.messages[indexPath.row].text)
             return cell
         }
     }
@@ -127,6 +139,16 @@ class ChatViewController: UIViewController, UITableViewDataSource, UITableViewDe
     
     func didClickNavigationBarFirstRightButton() {
         // TODO: 点击更多按钮
+    }
+    
+    // MARK: MessageCellDelegate
+    
+    func didClickAvatar(type: Int) {
+        if type == MessageType.SelfMessage.rawValue {
+            self.navigationController?.pushViewController(UIViewController(), animated: true)
+        } else if type == MessageType.FriendMessage.rawValue {
+            self.navigationController?.pushViewController(UIViewController(), animated: true)
+        }
     }
     
     // MARK: Getter
@@ -240,12 +262,13 @@ class InputBarView: UIView {
 }
 
 class BaseMessageCell: UITableViewCell {
+    weak var delegate: MessageCellDelegate?
+    
     // MARK: Life Cycle
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         self.contentView.backgroundColor = UIColor(red: 233.0/255.0, green: 233.0/255.0, blue: 233.0/255.0, alpha: 1.0)
-        //        self.contentView.transform = CGAffineTransform(rotationAngle: CGFloat(-Double.pi))
         self.contentView.addSubview(self.avatarImageView)
         self.contentView.addSubview(self.cornerImageView)
         self.contentView.addSubview(self.messageTextView)
@@ -266,13 +289,23 @@ class BaseMessageCell: UITableViewCell {
         self.messageTextView.text = message
     }
     
+    @objc private func didClickAvatar() {
+        if self is SelfMessageCell {
+            self.delegate?.didClickAvatar(type: MessageType.SelfMessage.rawValue)
+        } else if self is FriendMessageCell {
+            self.delegate?.didClickAvatar(type: MessageType.FriendMessage.rawValue)
+        }
+    }
+    
     // MARK: Getter
 
     lazy var avatarImageView: UIImageView = {
-        let imageView = UIImageView(image: UIImage(named: "default_avatar"))
+        let imageView = UIImageView()
         imageView.clipsToBounds = true
         imageView.layer.cornerRadius = 4
+        imageView.isUserInteractionEnabled = true
         imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(didClickAvatar)))
         return imageView
     }()
     

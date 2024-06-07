@@ -19,18 +19,6 @@ struct ChatMessage: Decodable {
     let type: Int
 }
 
-struct FriendInfo: Decodable, Identifiable {
-    let avatarUrl: String?
-    let nickName: String
-    let noteName: String?
-    let id: String
-    let messages: [ChatMessage]
-    
-    func displayName() -> String {
-        return self.noteName ?? self.nickName;
-    }
-}
-
 enum Gender: String, Decodable {
     case female = "女"
     case male = "男"
@@ -73,6 +61,16 @@ final class UserInfo: ObservableObject, Decodable {
         case nickName
         case userId
         case moreInfo
+    }
+}
+
+struct FriendInfo: Decodable {
+    let userInfo: UserInfo
+    let noteName: String?
+    let messages: [ChatMessage]
+    
+    func displayName() -> String {
+        return self.noteName ?? self.userInfo.nickName;
     }
 }
 

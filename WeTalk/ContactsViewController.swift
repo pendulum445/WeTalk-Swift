@@ -102,7 +102,7 @@ class ContactsViewController : UIViewController, UITableViewDataSource, UITableV
         let cell = tableView.dequeueReusableCell(withIdentifier: String(describing: ContactCell.self), for: indexPath) as! ContactCell
         let key = self.sectionLetters[indexPath.section]
         let friendInfo = self.contactsModel[key]![indexPath.row]
-        cell.update(avatarUrl: friendInfo.avatarUrl, title: friendInfo.displayName())
+        cell.update(avatarUrl: friendInfo.userInfo.avatarUrl, title: friendInfo.displayName())
         return cell
     }
     
@@ -207,7 +207,7 @@ class ContactCell : UITableViewCell {
     
     // MARK: Getter
     private lazy var avatarImageView: UIImageView = {
-        let imageView = UIImageView(image: UIImage(named: "default_avatar"))
+        let imageView = UIImageView()
         imageView.clipsToBounds = true
         imageView.layer.cornerRadius = 4
         imageView.translatesAutoresizingMaskIntoConstraints = false

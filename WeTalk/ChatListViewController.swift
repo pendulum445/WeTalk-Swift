@@ -222,7 +222,7 @@ class ChatCell: UITableViewCell {
             self.timeLabel.text = ""
         }
         self.updateUnreadRedDot(with: model.unreadCount)
-        self.avatarImageView.sd_setImage(with: URL(string: model.friendInfo.avatarUrl ?? "error_avartar_url"), placeholderImage: UIImage(named: "default_avatar"))
+        self.avatarImageView.sd_setImage(with: URL(string: model.friendInfo.userInfo.avatarUrl ?? "error_avartar_url"), placeholderImage: UIImage(named: "default_avatar"))
         self.contentView.setNeedsLayout()
     }
     
@@ -233,7 +233,7 @@ class ChatCell: UITableViewCell {
     
     // MARK: Getter
     private lazy var avatarImageView: UIImageView = {
-        let imgView = UIImageView(image: UIImage(named: "default_avatar"))
+        let imgView = UIImageView()
         imgView.clipsToBounds = true
         imgView.layer.cornerRadius = 4
         imgView.translatesAutoresizingMaskIntoConstraints = false

@@ -18,6 +18,7 @@
 		A2FED6F12C11B00500CBB2B0 /* DataUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2FED6F02C11B00400CBB2B0 /* DataUtils.swift */; };
 		A2FED6F42C11D41B00CBB2B0 /* SDWebImage in Frameworks */ = {isa = PBXBuildFile; productRef = A2FED6F32C11D41B00CBB2B0 /* SDWebImage */; };
 		A2FED6F62C11D41B00CBB2B0 /* SDWebImageMapKit in Frameworks */ = {isa = PBXBuildFile; productRef = A2FED6F52C11D41B00CBB2B0 /* SDWebImageMapKit */; };
+		A2FED6F82C12DAF100CBB2B0 /* FriendInfoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2FED6F72C12DAF100CBB2B0 /* FriendInfoViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -31,6 +32,7 @@
 		A2DA52972AC56F79000276EF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A2DA529C2AC56F79000276EF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A2FED6F02C11B00400CBB2B0 /* DataUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataUtils.swift; sourceTree = "<group>"; };
+		A2FED6F72C12DAF100CBB2B0 /* FriendInfoViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendInfoViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -75,6 +77,7 @@
 				A2259FA02AC68C350047E6E3 /* MainTabBarController.swift */,
 				A28213B72ACE9DC300D1246C /* NavigationBarView.swift */,
 				A2DA52972AC56F79000276EF /* Assets.xcassets */,
+				A2FED6F72C12DAF100CBB2B0 /* FriendInfoViewController.swift */,
 			);
 			path = WeTalk;
 			sourceTree = "<group>";
@@ -161,6 +164,7 @@
 				A2259FA12AC68C350047E6E3 /* MainTabBarController.swift in Sources */,
 				A28213B82ACE9DC300D1246C /* NavigationBarView.swift in Sources */,
 				A2FED6F12C11B00500CBB2B0 /* DataUtils.swift in Sources */,
+				A2FED6F82C12DAF100CBB2B0 /* FriendInfoViewController.swift in Sources */,
 				A2B0F1FB2AD251A50051A41E /* ChatViewController.swift in Sources */,
 				A2259F9F2AC689BC0047E6E3 /* ChatListViewController.swift in Sources */,
 				A253D8942AD3E0E0003C495D /* ContactsViewController.swift in Sources */,
