@@ -22,13 +22,13 @@ func firstLetterOf(string: String) -> String {
     return String(firstCharacter).uppercased()
 }
 
-class ContactsViewController : UIViewController, UITableViewDataSource, UITableViewDelegate, NavigationBarViewDelegate {
-    
+class ContactsViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, NavigationBarViewDelegate {
     private var contactsModel: [String: [FriendInfo]] = [:]
     private var sectionLetters: [String] = []
     private var fetchDataFailed = false
     
     // MARK: Life Cycle
+
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view.backgroundColor = UIColor(red: 233.0/255.0, green: 233.0/255.0, blue: 233.0/255.0, alpha: 1.0)
@@ -72,10 +72,10 @@ class ContactsViewController : UIViewController, UITableViewDataSource, UITableV
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
     }
     
     // MARK: Custom
+
     private func groupByFirstLetter(friendInfos: [FriendInfo]) {
         for it in friendInfos {
             var firstLetter = firstLetterOf(string: it.displayName())
@@ -94,6 +94,7 @@ class ContactsViewController : UIViewController, UITableViewDataSource, UITableV
     }
     
     // MARK: UITableViewDataSource
+
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return self.contactsModel[self.sectionLetters[section]]?.count ?? 0
     }
@@ -111,12 +112,15 @@ class ContactsViewController : UIViewController, UITableViewDataSource, UITableV
     }
     
     // MARK: UITableViewDelegate
+
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 56
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        
+        let key = self.sectionLetters[indexPath.section]
+        let friendInfo = self.contactsModel[key]![indexPath.row]
+        self.navigationController?.pushViewController(FriendInfoViewController(friendInfo: friendInfo), animated: true)
     }
     
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
@@ -128,6 +132,7 @@ class ContactsViewController : UIViewController, UITableViewDataSource, UITableV
     }
     
     // MARK: NavigationBarViewDelegate
+
     func didClickNavigationBarFirstRightButton() {
         // TODO: 点击搜索按钮
     }
@@ -137,6 +142,7 @@ class ContactsViewController : UIViewController, UITableViewDataSource, UITableV
     }
     
     // MARK: Getter
+
     private lazy var navigationBarView: HomeNavigationBarView = {
         let view = HomeNavigationBarView(title: "通讯录")
         view.delegate = self
@@ -166,9 +172,9 @@ class ContactsViewController : UIViewController, UITableViewDataSource, UITableV
     }()
 }
 
-class ContactCell : UITableViewCell {
-    
+class ContactCell: UITableViewCell {
     // MARK: Life Cycle
+
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         self.contentView.backgroundColor = .white
@@ -191,6 +197,7 @@ class ContactCell : UITableViewCell {
         ])
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -206,6 +213,7 @@ class ContactCell : UITableViewCell {
     }
     
     // MARK: Getter
+
     private lazy var avatarImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.clipsToBounds = true
@@ -230,9 +238,9 @@ class ContactCell : UITableViewCell {
     }()
 }
 
-class ContactHeaderView : UIView {
-    
+class ContactHeaderView: UIView {
     // MARK: Life Cycle
+
     init(title: String) {
         super.init(frame: CGRectZero)
         self.addSubview(self.titleLabel)
@@ -245,6 +253,7 @@ class ContactHeaderView : UIView {
         ])
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -256,9 +265,4 @@ class ContactHeaderView : UIView {
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
-}
-
-struct FriendListResponse : Decodable {
-    let code: Int
-    let data: [FriendInfo]
 }

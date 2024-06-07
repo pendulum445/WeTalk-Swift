@@ -145,9 +145,9 @@ class ChatViewController: UIViewController, UITableViewDataSource, UITableViewDe
     
     func didClickAvatar(type: Int) {
         if type == MessageType.SelfMessage.rawValue {
-            self.navigationController?.pushViewController(UIViewController(), animated: true)
+            self.navigationController?.pushViewController(FriendInfoViewController(friendInfo: self.friendInfo), animated: true)
         } else if type == MessageType.FriendMessage.rawValue {
-            self.navigationController?.pushViewController(UIViewController(), animated: true)
+            self.navigationController?.pushViewController(FriendInfoViewController(friendInfo: self.friendInfo), animated: true)
         }
     }
     
