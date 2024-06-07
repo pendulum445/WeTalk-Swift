@@ -63,24 +63,32 @@ class ChatViewController: UIViewController, UITableViewDataSource, UITableViewDe
         NotificationCenter.default.removeObserver(self)
     }
     
-    @objc private func keyboardWillShow(notification: NSNotification) {
-        if let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue {
-            let keyboardHeight = keyboardFrame.cgRectValue.height
-            self.inputBarBottomConstraint.constant = -keyboardHeight+32
-            UIView.animate(withDuration: 0.3) {
-                self.view.layoutIfNeeded()
-                self.tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: keyboardHeight, right: 0)
-                self.tableView.scrollIndicatorInsets = self.tableView.contentInset
+    // MARK: Custom
+    private func scrollToBottom() {
+        guard let friendInfo = friendInfo, friendInfo.messages.count > 0 else { return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.005) {
+            if friendInfo.messages.count > 0 {
+                let indexPath = IndexPath(row: self.tableView.numberOfRows(inSection: 0) - 1, section: 0)
+                self.tableView.scrollToRow(at: indexPath, at: .bottom, animated: false)
             }
         }
     }
-        
+    
+    @objc private func keyboardWillShow(notification: NSNotification) {
+        if let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue {
+            let keyboardHeight = keyboardFrame.cgRectValue.height
+            self.scrollToBottom()
+            self.inputBarBottomConstraint.constant = -keyboardHeight+32
+            UIView.animate(withDuration: 0.3) {
+                self.view.layoutIfNeeded()
+            }
+        }
+    }
+    
     @objc private func keyboardWillHide(notification: NSNotification) {
         self.inputBarBottomConstraint.constant = 0
         UIView.animate(withDuration: 0.3) {
             self.view.layoutIfNeeded()
-            self.tableView.contentInset = .zero
-            self.tableView.scrollIndicatorInsets = .zero
         }
     }
     
@@ -88,12 +96,7 @@ class ChatViewController: UIViewController, UITableViewDataSource, UITableViewDe
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if !self.hasScrolledToBottom {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.005) {
-                if (self.friendInfo?.messages.count ?? 0) > 0 {
-                    let indexPath = IndexPath(row: self.tableView.numberOfRows(inSection: 0) - 1, section: 0)
-                    self.tableView.scrollToRow(at: indexPath, at: .bottom, animated: false)
-                }
-            }
+            self.scrollToBottom()
         }
         return self.friendInfo?.messages.count ?? 0
     }
